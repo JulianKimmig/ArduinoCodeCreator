@@ -10,6 +10,8 @@ class ArduinoClass():
 Arduino = ArduinoClass(
     Function("analogRead", [uint8_t],uint16_t),
     Function("analogWrite", [uint8_t,uint8_t],uint16_t),
+    Function("digitalRead", [uint8_t],uint16_t),
+    Function("digitalWrite", [uint8_t,uint8_t],uint16_t),
     Function("random", arguments=[],return_type=uint16_t ),
     Function(name="randomSeed", arguments=[uint32_t],return_type=void),
     Function(return_type=void, name="memcpy", arguments=[uint8_t_pointer,uint8_t_pointer,uint8_t]),
