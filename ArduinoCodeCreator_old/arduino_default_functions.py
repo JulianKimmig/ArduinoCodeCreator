@@ -16,30 +16,12 @@ serial_read = ArduinoFunction(dt.int, name="Serial.read", arguments=[], obscurab
                                    accept_any_type=True)
 
 
-analog_read = ArduinoFunction(dt.uint16_t, name="analogRead", arguments=[dt.uint8_t], obscurable=False,
-                              accept_any_type=True)
-
-
-
 
 sizeof = ArduinoFunction(dt.uint16_t, name="sizeof", arguments=[dt.uint8_t], obscurable=False, accept_any_type=True)
 eeprom_get = ArduinoFunction(dt.void, name="EEPROM.get", arguments=[dt.uint8_t, dt.uint8_t], obscurable=False,
                              accept_any_type=True)
 eeprom_put = ArduinoFunction(dt.void, name="EEPROM.put", arguments=[dt.uint8_t, dt.uint8_t], obscurable=False,
                              accept_any_type=True)
-
-random = ArduinoFunction(dt.uint16_t, name="random", arguments=[], obscurable=False,
-                             accept_any_type=True)
-random_seed = ArduinoFunction(dt.void, name="randomSeed", arguments=[dt.uint32_t], obscurable=False,
-                         accept_any_type=True)
-memcpy = ArduinoFunction(dt.void, name="memcpy", arguments=[dt.uint8_t_pointer,dt.uint8_t_pointer,dt.uint8_t], obscurable=False,
-                         accept_any_type=True)
-
-millis = ArduinoFunction(dt.uint32_t, name="millis", obscurable=False,accept_any_type=True)
-
-max = ArduinoFunction(dt.uint32_t, name="max", arguments=[dt.uint32_t,dt.uint32_t], obscurable=False,accept_any_type=True)
-
-
 
 
 
