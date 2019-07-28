@@ -24,7 +24,6 @@ class AbstractStructureType():
     def get_name(self,obscure,intendation=0):
         n = self._obscure_name if obscure or self.name is None else self.name
         try:
-            print("N: ", n(obscure=obscure,intendation=intendation))
             return n(obscure=obscure,intendation=intendation)
         except Exception as e:
             #import traceback
@@ -45,7 +44,6 @@ class AbstractVariable(AbstractStructureType):
 
     def set(self,value):
         value = to_abstract_var(value)
-        print(value.get_name(False,1))
         return partial(self.set_code,value=value)
 
     def math_operation(self,other,operation):
@@ -147,7 +145,6 @@ class AbstractFunction(AbstractStructureType):
         self.arguments=[]
         if arguments is not None:
             for variable in to_variables(arguments):
-                print("var:" ,variable)
                 self.add_argument(variable)
 
     def add_argument(self,arduino_variable):
@@ -188,7 +185,6 @@ class Function(AbstractFunction):
     def add_call(self, *call):
         for c in call:
             if isinstance(c,AbstractVariable):
-                print(lambda_abstract_var_name(abstract_variable=c,obscure=False,intendation=0))
                 c = partial(lambda_abstract_var_name,abstract_variable=c)
             self.inner_calls.append(c)
 
@@ -196,7 +192,6 @@ class Function(AbstractFunction):
         code = "{} {}({}){{".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure,intendation=intendation)) for arg in self.arguments]))
         if not obscure:
             code +="\n"
-        print([c(obscure=obscure,intendation=intendation+1) for c in self.inner_calls])
         code +="".join([c(obscure=obscure,intendation=intendation+1) for c in self.inner_calls])
         code +="}"
         if not obscure:
