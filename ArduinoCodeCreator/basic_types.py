@@ -21,6 +21,7 @@ class AbstractStructureType():
         self.name = name
         self.type = type
 
+
     def get_name(self,obscure,intendation=0):
         n = self._obscure_name if obscure or self.name is None else self.name
         try:
