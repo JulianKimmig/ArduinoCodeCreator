@@ -47,11 +47,16 @@ class AbstractVariable(AbstractStructureType):
         value = to_abstract_var(value)
         print(value.get_name(False,1))
         return partial(self.set_code,value=value)
-    #    return lambda obscure,intendation: lambda o,i:
 
     def math_operation(self,other,operation):
         other = to_abstract_var(other)
         return AbstractVariable(partial(lambda_operation,var1=self,var2=other,operator=operation),dt.add_types(self.type,other.type),obscurable=False,settable=False)
+
+    def to_pointer(self):
+        return AbstractVariable(
+            name=lambda obscure,intendation:"*{}".format(self.get_name(obscure=obscure)),
+            type = self.type
+        )
 
     def __call__(self,obscure,indentation):
         return "{}{};{}".format("\t"*indentation,self.get_name(obscure = obscure,intendation=indentation),"\n" if not obscure else "")
@@ -103,7 +108,6 @@ class Variable(AbstractVariable):
         return partial(self.set_code,
                        value=to_abstract_var(value)
                        )
-        return lambda o,i:"{}{}={};{}".format("\t"*i,self.get_name(o),to_abstract_var(value).get_name(o),"\n" if not o else "")
 
     def as_attribute(self,obscure,intendation=0):
         return "{}{} {}".format("\t"*intendation,self.type,self.get_name(obscure=obscure))

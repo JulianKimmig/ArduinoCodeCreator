@@ -1,4 +1,5 @@
 from ArduinoCodeCreator import arduino_data_types as dt
+from ArduinoCodeCreator.arduino import Arduino
 from ArduinoCodeCreator.arduino_data_types import uint16_t
 from ArduinoCodeCreator.basic_types import Variable, Function, Definition, Array
 
@@ -62,7 +63,7 @@ class ArduinoCodeCreator():
 
 if __name__ == "__main__":
     acc = ArduinoCodeCreator()
-    var1 = acc.add(Variable("test",dt.uint8_t,23))
+    var1 = acc.add(Variable("test",dt.uint32_t,23))
 
     D1 = acc.add(Definition("DEF1",100))
     array1 = acc.add(Array("array",dt.uint32_t,size=D1))
@@ -87,6 +88,7 @@ if __name__ == "__main__":
         var1.set((var1+D1)*10),
         var1.set(var1+(D1*10)),
         var1.set(var1+D1*10),
+        Arduino.memcpy(var1.to_pointer(),var1.to_pointer(),var1.type.byte_size)
     )
 
 
