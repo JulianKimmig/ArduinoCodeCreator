@@ -1,7 +1,7 @@
 from ArduinoCodeCreator import arduino_data_types as dt
 from ArduinoCodeCreator.arduino import Arduino
 from ArduinoCodeCreator.arduino_data_types import uint16_t
-from ArduinoCodeCreator.basic_types import Variable, Function, Definition, Array
+from ArduinoCodeCreator.basic_types import Variable, Function, Definition, Array, FunctionArray
 
 
 class ArduinoCodeCreator():
@@ -68,6 +68,7 @@ if __name__ == "__main__":
     D1 = acc.add(Definition("DEF1",100))
     array1 = acc.add(Array("array",dt.uint32_t,size=D1))
     array2 = acc.add(Array("array",dt.uint16_t,size=2))
+    farray = acc.add(FunctionArray("functionarray", arguments=[Array("data",dt.uint8_t,0), Variable(type=dt.uint8_t, name="s")], return_type=dt.void,size=2))
 
     func1 = acc.add(Function(
         name="testfunction",

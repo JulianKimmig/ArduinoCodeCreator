@@ -108,8 +108,8 @@ class Variable(AbstractVariable):
                        value=to_abstract_var(value)
                        )
 
-    def as_attribute(self,obscure,intendation=0):
-        return "{}{} {}".format("\t"*intendation,self.type,self.get_name(obscure=obscure))
+    def as_attribute(self,obscure):
+        return "{} {}".format(self.type,self.get_name(obscure=obscure))
 
 def to_variables(arguments):
     if arguments is None:
@@ -159,6 +159,10 @@ class AbstractFunction(AbstractStructureType):
             type = self.type
         )
 
+    def as_attribute(self,obscure):
+        #void (*func)(uint8_t* data, uint8_t s)
+        return "{} (*{})({})".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure)) for arg in self.arguments]))
+
 class Function(AbstractFunction):
     def __init__(self, name, arguments=None, return_type=void,code=None,variables=None,obscurable=True):
         super().__init__(name, arguments, return_type,obscurable=obscurable)
@@ -190,7 +194,7 @@ class Function(AbstractFunction):
             self.inner_calls.append(c)
 
     def initalize_code(self,obscure,intendation=0):
-        code = "{} {}({}){{".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure,intendation=intendation)) for arg in self.arguments]))
+        code = "{} {}({}){{".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure)) for arg in self.arguments]))
         if not obscure:
             code +="\n"
         code +="".join([c(obscure=obscure,intendation=intendation+1) for c in self.inner_calls])
@@ -204,8 +208,8 @@ class Array(Variable):
         super().__init__(name=name, type=type, value=value, obscurable=obscurable)
         self.size = to_abstract_var(size)
 
-    def as_attribute(self,obscure,intendation=0):
-        return super().as_attribute(obscure=obscure,intendation=intendation).replace(str(self.type),"*{}".format(self.type),1)
+    def as_attribute(self,obscure):
+        return super().as_attribute(obscure=obscure).replace(str(self.type),"*{}".format(self.type),1)
 
     def initalize_code(self,obscure,intendation=0):
         return super().initalize_code(obscure=obscure,intendation=intendation).replace(
@@ -220,4 +224,24 @@ class Array(Variable):
         return AbstractVariable(
             name= partial(self.get_code,index_object=to_abstract_var(index_object)),
             type = self.type
+        )
+
+class FunctionArray(Array):
+    def __init__(self, name=None, return_type=uint8_t,arguments=None, size=0, value=None, obscurable=True):
+        super().__init__(name=name, type=return_type, size=size, value=value, obscurable=obscurable)
+        self.arguments = arguments
+
+    def initalize_code(self,obscure,intendation=0):
+        code = "{}{};{}".format(
+            "\t"*intendation,
+            self[self.size.get_name(obscure=obscure,intendation=0)].as_attribute(obscure=obscure),
+            "\n" if not obscure else "")
+        return code
+
+    def __getitem__(self, item):
+        return AbstractFunction(
+            name= partial(self.get_code,index_object=to_abstract_var(item)),
+            arguments=self.arguments,
+            return_type=self.type,
+            obscurable=False
         )
