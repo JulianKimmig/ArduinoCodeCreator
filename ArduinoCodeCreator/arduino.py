@@ -1,11 +1,5 @@
 from ArduinoCodeCreator.arduino_data_types import uint16_t, uint8_t, void, uint32_t, uint8_t_pointer
-from ArduinoCodeCreator.basic_types import Function
-
-class ArduinoClass():
-    def __init__(self,*attributes):
-        for a in attributes:
-            a.obscurable = False
-            setattr(self,a.name,a)
+from ArduinoCodeCreator.basic_types import Function, ArduinoClass
 
 Arduino = ArduinoClass(
     Function("analogRead", [uint8_t],uint16_t),
@@ -26,5 +20,6 @@ Serial = ArduinoClass(
 )
 
 Eeprom = ArduinoClass(
-    Function("write",void,[])
+    Function("write",void,[]),
+    include="<EEPROM.h>"
 )

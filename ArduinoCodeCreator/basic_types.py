@@ -86,6 +86,7 @@ class Definition(AbstractVariable):
         return "{}#define {} {}\n".format("\t"*intendation,self.get_name(obscure=obscure),self.value)
 
 
+
 class Variable(AbstractVariable):
     def __init__(self, name=None, type = uint8_t,value=None, obscurable=True):
         super().__init__(name=name, type=type, obscurable=obscurable)
@@ -245,3 +246,11 @@ class FunctionArray(Array):
             return_type=self.type,
             obscurable=False
         )
+
+
+class ArduinoClass():
+    def __init__(self,*attributes,include=None):
+        self.include = include
+        for a in attributes:
+            a.obscurable = False
+            setattr(self,a.name,a)
