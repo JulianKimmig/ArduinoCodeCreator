@@ -1,11 +1,12 @@
 from ArduinoCodeCreator import arduino_data_types as dt
 from ArduinoCodeCreator.arduino import Arduino
 from ArduinoCodeCreator.arduino_data_types import uint16_t
-from ArduinoCodeCreator.basic_types import Variable, Function, Definition, Array, FunctionArray
+from ArduinoCodeCreator.basic_types import Variable, Function, Definition, Array, FunctionArray, ArduinoClass
 
 
 class ArduinoCodeCreator():
     def __init__(self):
+        self.classes = []
         self.definitions=[]
         self.imports=[]
         self.global_variables=[]
@@ -21,8 +22,9 @@ class ArduinoCodeCreator():
         for definition in self.definitions:
             code+=definition.initalize_code(obscure=obscure,intendation=0)
 
-        for include in self.includes:
-            code+=include.initalize_code(obscure=obscure,intendation=0)
+
+        for includeclass in self.classes:
+            code+="#include {}\n".format(includeclass.include+"\n") if includeclass.include is not None else ""
 
         for global_variable in self.global_variables:
              code+=global_variable.initalize_code(obscure=obscure,intendation=0)
@@ -39,6 +41,8 @@ class ArduinoCodeCreator():
             return self.add_function(arduino_object)
         if isinstance(arduino_object,Variable):
             return self.add_global_variable(arduino_object)
+        if isinstance(arduino_object,ArduinoClass):
+            return self.add_class(arduino_object)
         #if isinstance(arduino_object,ArduinoInclude):
         #    return self.add_include(arduino_object)
 
@@ -58,6 +62,10 @@ class ArduinoCodeCreator():
 
     def add_include(self, arduino_object):
         self.includes.append(arduino_object)
+        return arduino_object
+
+    def add_class(self, arduino_object):
+        self.classes.append(arduino_object)
         return arduino_object
 
 
