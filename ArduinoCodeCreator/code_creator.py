@@ -1,6 +1,6 @@
 from ArduinoCodeCreator import arduino_data_types as dt
 from ArduinoCodeCreator.arduino_data_types import uint16_t
-from ArduinoCodeCreator.basic_types import Variable, Function, Definition
+from ArduinoCodeCreator.basic_types import Variable, Function, Definition, Array
 
 
 class ArduinoCodeCreator():
@@ -65,16 +65,21 @@ if __name__ == "__main__":
     var1 = acc.add(Variable("test",dt.uint8_t,23))
 
     D1 = acc.add(Definition("DEF1",100))
+    array1 = acc.add(Array("array",dt.uint32_t,size=D1))
+    array2 = acc.add(Array("array",dt.uint16_t,size=2))
 
     func1 = acc.add(Function(
         name="testfunction",
-        arguments=[dt.uint8_t,Variable("a2",dt.uint8_t)],
+        arguments=[array1,Variable("a2",dt.uint8_t)],
         return_type=uint16_t,
         code=var1.set(var1 + D1),
         variables=[(dt.uint8_t,"B",1)]
     ))
+ #   print(func1.arg1,func1.arg2)
     func1.add_call(
-        var1.set(func1.arg1*func1.var1)
+        var1.set(func1.arg2*func1.var1),
+        func1.arg1[var1].set(10),
+        func1.arg1[2].set(var1),
     )
 
     acc.setup.add_call(
