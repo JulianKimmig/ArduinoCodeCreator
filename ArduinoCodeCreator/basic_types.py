@@ -131,7 +131,7 @@ class AbstractFunction(AbstractStructureType):
         super().__init__(name=name,type=return_type,obscurable=obscurable)
         self.arguments=[]
         if arguments is not None:
-            for variable in list(to_variable(arguments)):
+            for variable in list([to_variable(arguments)]):
                 self.add_argument(variable)
 
     def add_argument(self,arduino_variable):

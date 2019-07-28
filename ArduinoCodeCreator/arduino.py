@@ -24,3 +24,7 @@ Arduino = ArduinoClass(
 Serial = ArduinoClass(
     Function("write",void,[])
 )
+
+Eeprom = ArduinoClass(
+    Function("write",void,[])
+)
