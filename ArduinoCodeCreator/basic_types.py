@@ -68,12 +68,15 @@ class AbstractVariable(AbstractStructureType):
     __sub__ = partialmethod(math_operation,operation = "-")
     __mul__ = partialmethod(math_operation,operation = "*")
     __truediv__ = partialmethod(math_operation,operation = "/")
+    __mod__  = partialmethod(math_operation,operation = "%")
     __lt__ = partialmethod(math_operation,operation = "<")
     __le__ = partialmethod(math_operation,operation = "<=")
     __gt__ = partialmethod(math_operation,operation = ">")
     __ge__ = partialmethod(math_operation,operation = ">=")
     __eq__ = partialmethod(math_operation,operation = "==")
     __ne__ = partialmethod(math_operation,operation = "!=")
+    __rshift__ = partialmethod(math_operation,operation = ">>")
+    __lshift__ = partialmethod(math_operation,operation = ">>")
 
     def __neg__(self):
         return AbstractVariable(lambda obscure,intendation:"-{}".format(self.inline(obscure=obscure,intendation=0)),self.type,obscurable=False,settable=False)
