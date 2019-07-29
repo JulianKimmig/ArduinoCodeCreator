@@ -1,6 +1,7 @@
 import time
 
 import random
+import re
 import string
 from functools import partial, partialmethod
 
@@ -13,6 +14,9 @@ def lambda_abstract_var_name(obscure,intendation,abstract_variable):
 
 def lambda_operation(obscure,intendation,var1,var2,operator):
     return "({}{}{})".format(var1.inline(obscure=obscure,intendation=0),operator,var2.inline(obscure=obscure,intendation=0))
+
+def lambda_remove_tabs_newline(obscure,intendation,func):
+    return re.sub(";$","",func(obscure=obscure,intendation=intendation).replace("\t","").replace("\n",""))
 
 class AbstractStructureType():
     def __init__(self, name=None,type=dt.void, obscurable=True):
@@ -61,7 +65,18 @@ class AbstractVariable(AbstractStructureType):
         return "{}{};{}".format("\t"*indentation,self.get_name(obscure = obscure,intendation=indentation),"\n" if not obscure else "")
 
     __add__ = partialmethod(math_operation,operation = "+")
+    __sub__ = partialmethod(math_operation,operation = "-")
     __mul__ = partialmethod(math_operation,operation = "*")
+    __truediv__ = partialmethod(math_operation,operation = "/")
+    __lt__ = partialmethod(math_operation,operation = "<")
+    __le__ = partialmethod(math_operation,operation = "<=")
+    __gt__ = partialmethod(math_operation,operation = ">")
+    __ge__ = partialmethod(math_operation,operation = ">=")
+    __eq__ = partialmethod(math_operation,operation = "==")
+    __ne__ = partialmethod(math_operation,operation = "!=")
+
+    def __neg__(self):
+        return AbstractVariable(lambda obscure,intendation:"-{}".format(self.inline(obscure=obscure,intendation=0)),self.type,obscurable=False,settable=False)
 
 
 def to_abstract_var(value):
@@ -141,7 +156,7 @@ def to_variables(arguments):
 
     return vars
 
-class AbstractFunction(AbstractStructureType):
+class AbstractFunction(AbstractVariable):
     def __init__(self,name=None,arguments=None,return_type=void,obscurable=False):
         super().__init__(name=name,type=return_type,obscurable=obscurable)
         self.arguments=[]
@@ -165,8 +180,8 @@ class AbstractFunction(AbstractStructureType):
         return "{} (*{})({})".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure)) for arg in self.arguments]))
 
 class Function(AbstractFunction):
-    def __init__(self, name, arguments=None, return_type=void,code=None,variables=None,obscurable=True):
-        super().__init__(name, arguments, return_type,obscurable=obscurable)
+    def __init__(self, name=None, arguments=None, return_type=void,code=None,variables=None,obscurable=True):
+        super().__init__(name=name, arguments=arguments, return_type=return_type,obscurable=obscurable)
         self.inner_calls = []
         self.variables = []
         if variables is not None:
@@ -194,11 +209,14 @@ class Function(AbstractFunction):
                 c = partial(lambda_abstract_var_name,abstract_variable=c)
             self.inner_calls.append(c)
 
+    def inner_code(self,obscure,intendation=0):
+        return "".join([c(obscure=obscure,intendation=intendation) for c in self.inner_calls])
+
     def initalize_code(self,obscure,intendation=0):
         code = "{} {}({}){{".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure)) for arg in self.arguments]))
         if not obscure:
             code +="\n"
-        code +="".join([c(obscure=obscure,intendation=intendation+1) for c in self.inner_calls])
+        code +=self.inner_code(obscure=obscure,intendation=intendation+1)
         code +="}"
         if not obscure:
             code +="\n"
@@ -254,3 +272,24 @@ class ArduinoClass():
         for a in attributes:
             a.obscurable = False
             setattr(self,a.name,a)
+
+class ArduinoStatement():
+    def __init__(self,code,ignore_intendations=False):
+        self.ignore_intendations = ignore_intendations
+        self.code = code
+
+    def to_code(self,args,obscure=True,intendation=0):
+        code=""
+        selfcode=self.code
+        if not obscure :
+            code+="\t"*intendation
+            if not self.ignore_intendations:
+                selfcode = selfcode.replace("\i","\t"*intendation)
+        else:
+            selfcode =  selfcode.replace("\n","")
+        selfcode = selfcode.replace("\i","")
+        code += selfcode.format(*[arg(obscure=obscure,intendation=0 if self.ignore_intendations else intendation+1) for arg in args])
+        return code
+
+    def __call__(self,*args, **kwargs):
+        return partial(self.to_code,args=args)

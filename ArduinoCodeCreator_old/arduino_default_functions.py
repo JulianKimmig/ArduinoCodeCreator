@@ -1,5 +1,5 @@
 from ArduinoCodeCreator import arduino_data_types as dt
-from ArduinoCodeCreator.functions import ArduinoFunction, ArduinoStatement
+from ArduinoCodeCreator_old.functions import ArduinoFunction, ArduinoStatement
 
 serial_begin = ArduinoFunction(dt.void, name="Serial.begin", arguments=[dt.uint32_t], obscurable=False,
                                accept_any_type=True)
