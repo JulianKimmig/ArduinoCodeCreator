@@ -6,15 +6,15 @@ class ArduinoOperator():
 
     def __call__(self,arg1,arg2):
         from ArduinoCodeCreator.variable import ToCode
-        def to_code(obscure,intendation):
+        def to_code(obscure,indentation):
             op1 = arg1
             op2 = arg2
             try:
-                op1=re.sub(";$","",re.sub("\n$","",op1(obscure=obscure,intendation=0)))
+                op1=re.sub(";$","",re.sub("\n$","",op1(obscure=obscure,indentation=0)))
             except TypeError :
                 pass
             try:
-                op2=re.sub(";$","",re.sub("\n$","",op2(obscure=obscure,intendation=0)))
+                op2=re.sub(";$","",re.sub("\n$","",op2(obscure=obscure,indentation=0)))
             except TypeError:
                 pass
             code =  "({} {} {})".format(op1,self.operator,op2)
@@ -25,8 +25,8 @@ class ArduinoOperator():
 class GetIndex():
     def __call__(self,array,index):
         from ArduinoCodeCreator.variable import ToCode
-        def to_code(obscure,intendation):
-            code = "({}[{}])".format(array(obscure=obscure,intendation=0),index)
+        def to_code(obscure,indentation):
+            code = "({}[{}])".format(array(obscure=obscure,indentation=0),index)
             return code
         return ToCode(to_code)
 

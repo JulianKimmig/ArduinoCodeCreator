@@ -21,17 +21,17 @@ class ArduinoCodeCreator():
         self.add(self.loop)
         code=""
         for definition in self.definitions:
-            code+=definition.initalize_code(obscure=obscure,intendation=0)
+            code+=definition.initalize_code(obscure=obscure,indentation=0)
 
 
         for includeclass in self.classes:
             code+="#include {}\n".format(includeclass.include) if includeclass.include is not None else ""
 
         for global_variable in self.global_variables:
-             code+=global_variable.initalize_code(obscure=obscure,intendation=0)
+             code+=global_variable.initalize_code(obscure=obscure,indentation=0)
 
         for function in self.functions:
-            code+=function.initalize_code(obscure=obscure,intendation=0)
+            code+=function.initalize_code(obscure=obscure,indentation=0)
 
         return code
 

@@ -56,16 +56,16 @@ class ForStatement(ArduinoStatement):
         self.k = ArduinoVariable(dt.uint8_t, 0, "k")
 
     def __call__(self, count_vaiable, continue_condition, raising_value=1, code=None):
-        inner_code = (lambda obscure, intendation: "") if code is None else code
-        raising_value_code = lambda obscure, intendation: "{}+={}".format(count_vaiable, raising_value)
-        count_vaiable_code = lambda obscure, intendation: count_vaiable.create_code(obscure=obscure,
-                                                                                    intendation=0).replace("\n", "")
+        inner_code = (lambda obscure, indentation: "") if code is None else code
+        raising_value_code = lambda obscure, indentation: "{}+={}".format(count_vaiable, raising_value)
+        count_vaiable_code = lambda obscure, indentation: count_vaiable.create_code(obscure=obscure,
+                                                                                    indentation=0).replace("\n", "")
 
         return super().__call__(count_vaiable_code, continue_condition, raising_value_code, inner_code)
 
 
-cast = ArduinoStatement("({}){}", ignore_intendations=True)
-to_pointer = ArduinoStatement("&{}", ignore_intendations=True)
+cast = ArduinoStatement("({}){}", ignore_indentations=True)
+to_pointer = ArduinoStatement("&{}", ignore_indentations=True)
 return_statement = ArduinoStatement("return {};\n")
 continue_statement = ArduinoStatement("return;\n")
 

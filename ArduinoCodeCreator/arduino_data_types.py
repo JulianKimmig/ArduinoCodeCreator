@@ -38,10 +38,13 @@ class ArduinoDataType:
         return pointer
 
 uint8_t = ArduinoDataType("uint8_t")
+int8_t = ArduinoDataType("int8_t")
 uint16_t = ArduinoDataType("uint16_t")
+int16_t = ArduinoDataType("int16_t")
 uint32_t =  ArduinoDataType("uint32_t")
 int32_t =  ArduinoDataType("uint32_t")
 uint64_t =  ArduinoDataType("uint64_t")
+int64_t =  ArduinoDataType("int64_t")
 
 bool =  ArduinoDataType("bool")
 

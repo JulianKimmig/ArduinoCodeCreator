@@ -19,16 +19,16 @@ class ArduinoCodeCreator():
         self.add(self.loop)
         code=""
         for definition in self.definitions:
-            code+=definition.create_code(obscure=obscure,intendation=0)
+            code+=definition.create_code(obscure=obscure,indentation=0)
 
         for include in self.includes:
-            code+=include.create_code(obscure=obscure,intendation=0)
+            code+=include.create_code(obscure=obscure,indentation=0)
 
         for global_variable in self.global_variables:
-            code+=global_variable.create_code(obscure=obscure,intendation=0)
+            code+=global_variable.create_code(obscure=obscure,indentation=0)
 
         for function in self.functions:
-            code+=function.create_code(obscure=obscure,intendation=0)
+            code+=function.create_code(obscure=obscure,indentation=0)
 
         return code
 

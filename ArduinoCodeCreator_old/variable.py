@@ -21,10 +21,10 @@ class ArduinoObject:
     def __repr__(self):
         return self._name_to_use
 
-    def __call__(self, obscure,intendation):
+    def __call__(self, obscure,indentation):
         return self._obscure_name if obscure else self.name
 
-    def create_code(self,obscure,intendation):
+    def create_code(self,obscure,indentation):
         if obscure:
             self._name_to_use = self._obscure_name
         else:
@@ -74,31 +74,31 @@ class ToCode(ArduinoObject):
         super().__init__(*args, **kwargs)
         self.call = call
 
-    def __call__(self, obscure,intendation):
-        return self.call(obscure=obscure,intendation=intendation)
+    def __call__(self, obscure,indentation):
+        return self.call(obscure=obscure,indentation=indentation)
 
 class ArduinoValueObject(ArduinoObject):
     def __init__(self,value=None,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.value = value
 
-    def create_code(self,obscure,intendation):
-        super().create_code(obscure=obscure,intendation=intendation)
+    def create_code(self,obscure,indentation):
+        super().create_code(obscure=obscure,indentation=indentation)
 
 class ArduinoDefinition(ArduinoValueObject):
-    def create_code(self,obscure,intendation):
-        super().create_code(obscure=obscure,intendation=intendation)
+    def create_code(self,obscure,indentation):
+        super().create_code(obscure=obscure,indentation=indentation)
         return "#define {} {}\n".format(self,self.value)
 
 
 def value_to_lambda(value):
     if value is None:
-        return lambda obscure,intendation:"null"
+        return lambda obscure,indentation:"null"
     try:
-        value(obscure=False,intendation=0)
+        value(obscure=False,indentation=0)
         return value
     except:
-        return lambda obscure,intendation: str(value)
+        return lambda obscure,indentation: str(value)
 
 class ArduinoVariable(ArduinoValueObject):
     def __init__(self,arduino_data_type,*args,**kwargs):
@@ -111,11 +111,11 @@ class ArduinoVariable(ArduinoValueObject):
     def to_argument(self):
         return "{} {}".format(self.arduino_data_type,self)
 
-    def create_code(self,obscure,intendation):
-        super().create_code(obscure=obscure,intendation=intendation)
+    def create_code(self,obscure,indentation):
+        super().create_code(obscure=obscure,indentation=indentation)
         code = ""
         if not obscure:
-            code+="\t"*intendation
+            code+="\t"*indentation
         code += "{} {}".format(self.arduino_data_type,self)
         if self.value is not None:
             code+="={}".format(self.value)
@@ -127,11 +127,11 @@ class ArduinoVariable(ArduinoValueObject):
     def set(self,value=None):
         value_func = value_to_lambda(value)
 
-        def to_code(obscure,intendation):
+        def to_code(obscure,indentation):
             code = ""
             if not obscure:
-                code+="\t"*intendation
-            code+= "{}={};".format(self,re.sub(";$","",re.sub("\n$","",value_func(obscure=obscure,intendation=0))))
+                code+="\t"*indentation
+            code+= "{}={};".format(self,re.sub(";$","",re.sub("\n$","",value_func(obscure=obscure,indentation=0))))
             if not obscure:
                 code+="\n"
             return code
@@ -143,7 +143,7 @@ class ArduinoVariable(ArduinoValueObject):
 
         from ArduinoCodeCreator.functions import ArduinoFunction
         func = ArduinoFunction(return_type,argumens,name=code,obscurable=not immutable)
-        ret = lambda *args,**kwargs: lambda obscure,intendation:"{}.{}".format(self,func(*args,**kwargs))
+        ret = lambda *args,**kwargs: lambda obscure,indentation:"{}.{}".format(self,func(*args,**kwargs))
         setattr(self,caller,ret)
 
 
@@ -152,24 +152,24 @@ class ArduinoVariableArray(ArduinoVariable):
         super().__init__(*args, **kwargs)
         self.array_size = array_size
 
-    def create_code(self,obscure,intendation):
+    def create_code(self,obscure,indentation):
         try:
-            array_size_= re.sub(";$","",re.sub("\n$","",self.array_size(obscure=obscure,intendation=0)))
+            array_size_= re.sub(";$","",re.sub("\n$","",self.array_size(obscure=obscure,indentation=0)))
         except TypeError as e:
             array_size_ = self.array_size
-        code = super().create_code(obscure=obscure,intendation=intendation).replace(self._name_to_use,"{}[{}]".format(self._name_to_use,array_size_))
+        code = super().create_code(obscure=obscure,indentation=indentation).replace(self._name_to_use,"{}[{}]".format(self._name_to_use,array_size_))
         return code
 
     def set(self,index,value=None):
         superfunc = super().set(value)
         index_func = value_to_lambda(index)
-        to_code = lambda obscure,intendation: superfunc(obscure,intendation).replace("{}=".format(self),"{}[{}]=".format(self,index_func(obscure=obscure,intendation=0)))
+        to_code = lambda obscure,indentation: superfunc(obscure,indentation).replace("{}=".format(self),"{}[{}]=".format(self,index_func(obscure=obscure,indentation=0)))
         return ToCode(to_code)
 
     def get(self,index):
         index_func = value_to_lambda(index)
-        def to_code(obscure,intendation):
-            return "{}[{}]".format(self,index_func(obscure,intendation))
+        def to_code(obscure,indentation):
+            return "{}[{}]".format(self,index_func(obscure,indentation))
         return ToCode(to_code)
 
 class ArduinoInclude(ArduinoObject):
@@ -177,8 +177,8 @@ class ArduinoInclude(ArduinoObject):
         super().__init__(*args,**kwargs)
         self.relative = relative
 
-    def create_code(self,obscure,intendation):
-        super().create_code(obscure=False,intendation=intendation)
+    def create_code(self,obscure,indentation):
+        super().create_code(obscure=False,indentation=indentation)
         if self.relative:
             return "#include \"{}\"\n".format(self)
         return "#include <{}>\n".format(self)

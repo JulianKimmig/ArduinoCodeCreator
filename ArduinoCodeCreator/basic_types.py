@@ -9,43 +9,49 @@ from ArduinoCodeCreator import arduino_data_types as dt
 from ArduinoCodeCreator.arduino_data_types import void, uint8_t
 
 
-def lambda_abstract_var_name(obscure,intendation,abstract_variable):
-    return "{}{};{}".format("\t"*intendation,abstract_variable.get_name(obscure=obscure,intendation=intendation),"\n" if not obscure else "")
+def lambda_abstract_var_name(obscure,indentation,abstract_variable):
+    return "{}{};{}".format("\t"*indentation,abstract_variable.get_name(obscure=obscure,indentation=indentation),"\n" if not obscure else "")
 
-def lambda_operation(obscure,intendation,var1,var2,operator):
-    return "({}{}{})".format(var1 if isinstance(var1,str) else var1.inline(obscure=obscure,intendation=0),operator,var2 if isinstance(var2,str) else var2.inline(obscure=obscure,intendation=0))
+def lambda_operation(obscure,indentation,var1,var2,operator):
+    return "({}{}{})".format(var1 if isinstance(var1,str) else var1.inline(obscure=obscure,indentation=0),operator,var2 if isinstance(var2,str) else var2.inline(obscure=obscure,indentation=0))
 
-def lambda_remove_tabs_newline(obscure,intendation,func):
-    return re.sub(";$","",func(obscure=obscure,intendation=intendation).replace("\t","").replace("\n",""))
+def lambda_remove_tabs_newline(obscure,indentation,func,remove_endtabs=True):
+    s = func(obscure=obscure,indentation=indentation).replace("\t","").replace("\n","")
+    if remove_endtabs:
+        s=re.sub(";$","",s)
+    return s
 
 class AbstractStructureType():
     def __init__(self, name=None,type=dt.void, obscurable=True):
         self._obscure_name = random.choice(string.ascii_letters) + ''.join([random.choice(string.ascii_letters + string.digits) for n in range(24)]) + str(
             time.time()).replace(".", "") if obscurable or name is None else name
-        self.name = name
+        self.name = name if name is not None else self._obscure_name
         self.type = type
+        self.obscurable = obscurable
 
 
-    def get_name(self,obscure,intendation=0):
-        n = self._obscure_name if obscure or self.name is None else self.name
+    def get_name(self,obscure,indentation=0):
+        n = self._obscure_name if obscure and self.obscurable else self.name
         try:
-            return n(obscure=obscure,intendation=intendation)
+            return n(obscure=obscure,indentation=indentation)
         except Exception as e:
             #import traceback
             #print(traceback.format_exc())
             return n
 
+    def __str__(self):
+        return self.get_name(obscure=False,indentation=0)
 
 class AbstractVariable(AbstractStructureType):
     def __init__(self, name=None, type=uint8_t, obscurable=False,settable=True):
         super().__init__(name=name,type=type, obscurable=obscurable)
         self.settable = settable
 
-    def inline(self,obscure,intendation=0):
+    def inline(self,obscure,indentation=0):
         return self.get_name(obscure=obscure)
 
-    def set_code(self,value,obscure=True,intendation=0):
-        return "{}{}={};{}".format("\t"*intendation,self.inline(obscure = obscure,intendation=0),value.inline(obscure = obscure,intendation=0),"\n" if not obscure else "")
+    def set_code(self,value,obscure=True,indentation=0):
+        return "{}{}={};{}".format("\t"*indentation,self.inline(obscure = obscure,indentation=0),value.inline(obscure = obscure,indentation=0),"\n" if not obscure else "")
 
     def set(self,value):
         value = to_abstract_var(value)
@@ -60,12 +66,18 @@ class AbstractVariable(AbstractStructureType):
 
     def to_pointer(self):
         return AbstractVariable(
-            name=lambda obscure,intendation:"*{}".format(self.get_name(obscure=obscure)),
+            name=lambda obscure,indentation:"&{}".format(self.get_name(obscure=obscure)),
             type = self.type
+        ).cast("(uint8_t*)")
+
+    def cast(self,datatype):
+        return AbstractVariable(
+            name=lambda obscure,indentation:"(({}){})".format(datatype,self.get_name(obscure=obscure)),
+            type = datatype
         )
 
     def __call__(self,obscure,indentation):
-        return "{}{};{}".format("\t"*indentation,self.get_name(obscure = obscure,intendation=indentation),"\n" if not obscure else "")
+        return "{}{};{}".format("\t"*indentation,self.get_name(obscure = obscure,indentation=indentation),"\n" if not obscure else "")
 
     __add__ = partialmethod(math_operation,operation = "+")
     __sub__ = partialmethod(math_operation,operation = "-")
@@ -87,7 +99,7 @@ class AbstractVariable(AbstractStructureType):
     __neg__ = partialmethod(variable_modifier,operation = "-")
     __invert__ = partialmethod(variable_modifier,operation = "~")
     #def __invert__(self):
-    #    return AbstractVariable(lambda obscure,intendation:"~{}".format(self.inline(obscure=obscure,intendation=0)),self.type,obscurable=False,settable=False)
+    #    return AbstractVariable(lambda obscure,indentation:"~{}".format(self.inline(obscure=obscure,indentation=0)),self.type,obscurable=False,settable=False)
 
 def to_abstract_var(value):
     if isinstance(value,AbstractVariable):
@@ -96,7 +108,7 @@ def to_abstract_var(value):
         if value is None:
             value = 'null'
         try:
-            value(obscure=False,intendation=0)
+            value(obscure=False,indentation=0)
         except:
             value = str(value)
         return AbstractVariable(name=value,obscurable=False)
@@ -107,8 +119,8 @@ class Definition(AbstractVariable):
         super().__init__(name=name, obscurable=obscurable)
         self.value = value
 
-    def initalize_code(self,obscure,intendation=0):
-        return "{}#define {} {}\n".format("\t"*intendation,self.get_name(obscure=obscure),self.value)
+    def initalize_code(self,obscure,indentation=0):
+        return "{}#define {} {}\n".format("\t"*indentation,self.get_name(obscure=obscure),self.value)
 
 
 
@@ -117,8 +129,8 @@ class Variable(AbstractVariable):
         super().__init__(name=name, type=type, obscurable=obscurable)
         self.value = value
 
-    def initalize_code(self,obscure,intendation=0):
-        code = "{}{} {}".format("\t"*intendation,self.type,self.get_name(obscure=obscure))
+    def initalize_code(self,obscure,indentation=0):
+        code = "{}{} {}".format("\t"*indentation,self.type,self.get_name(obscure=obscure))
         if self.value is not None:
             code +="={}".format(self.value)
         code +=";"
@@ -146,7 +158,7 @@ def to_variables(arguments):
         arguments = [arguments]
     vars=[]
     for arg in arguments:
-        if isinstance(arg, Variable):
+        if isinstance(arg, AbstractVariable):
             vars.append(arg)
             continue
         if isinstance(arg,dt.ArduinoDataType):
@@ -179,9 +191,9 @@ class AbstractFunction(AbstractVariable):
         setattr(self,"arg{}".format(len(self.arguments)),arduino_variable)
 
     def __call__(self, *args):
-        assert len(args) == len(self.arguments), "function call {}: invalid argumen length ({}) and ({})".format(self.name,", ".join([str(arg) for arg in args]),", ".join([str(argument) for argument in self.arguments]))
+        assert len(args) == len(self.arguments), "function call '{}' invalid argumen length ({}) and ({})".format(self.name,", ".join([str(arg) for arg in args]),", ".join([str(argument) for argument in self.arguments]))
         return AbstractVariable(
-            name=lambda obscure,intendation:"{}({})".format(self.get_name(obscure=obscure),','.join([to_abstract_var(arg).get_name(obscure=obscure) for arg in args])),
+            name=lambda obscure,indentation:"{}({})".format(self.get_name(obscure=obscure),','.join([to_abstract_var(arg).get_name(obscure=obscure) for arg in args])),
             type = self.type
         )
 
@@ -211,6 +223,7 @@ class Function(AbstractFunction):
             arduino_variable.initalize()
         )
         setattr(self,"var{}".format(len(self.variables)),arduino_variable)
+        return arduino_variable
 
 
     def add_call(self, *call):
@@ -219,14 +232,14 @@ class Function(AbstractFunction):
                 c = partial(lambda_abstract_var_name,abstract_variable=c)
             self.inner_calls.append(c)
 
-    def inner_code(self,obscure,intendation=0):
-        return "".join([c(obscure=obscure,intendation=intendation) for c in self.inner_calls])
+    def inner_code(self,obscure,indentation=0):
+        return "".join([c(obscure=obscure,indentation=indentation) for c in self.inner_calls])
 
-    def initalize_code(self,obscure,intendation=0):
+    def initalize_code(self,obscure,indentation=0):
         code = "{} {}({}){{".format(self.type,self.get_name(obscure=obscure),','.join([str(arg.as_attribute(obscure = obscure)) for arg in self.arguments]))
         if not obscure:
             code +="\n"
-        code +=self.inner_code(obscure=obscure,intendation=intendation+1)
+        code +=self.inner_code(obscure=obscure,indentation=indentation+1)
         code +="}"
         if not obscure:
             code +="\n"
@@ -238,16 +251,16 @@ class Array(Variable):
         self.size = to_abstract_var(size)
 
     def as_attribute(self,obscure):
-        return super().as_attribute(obscure=obscure).replace(str(self.type),"*{}".format(self.type),1)
+        return super().as_attribute(obscure=obscure).replace(str(self.type),"{}*".format(self.type),1)
 
-    def initalize_code(self,obscure,intendation=0):
-        return super().initalize_code(obscure=obscure,intendation=intendation).replace(
-            self.get_name(obscure=obscure,intendation=intendation),
-            self[self.size].get_name(obscure=obscure,intendation=intendation),
+    def initalize_code(self,obscure,indentation=0):
+        return super().initalize_code(obscure=obscure,indentation=indentation).replace(
+            self.get_name(obscure=obscure,indentation=indentation),
+            self[self.size].get_name(obscure=obscure,indentation=indentation),
             1)
 
-    def get_code(self,index_object,obscure,intendation):
-        return "{}[{}]".format(self.get_name(obscure=obscure,intendation=intendation),index_object.get_name(obscure=obscure,intendation=intendation))
+    def get_code(self,index_object,obscure,indentation):
+        return "{}[{}]".format(self.get_name(obscure=obscure,indentation=indentation),index_object.get_name(obscure=obscure,indentation=indentation))
 
     def __getitem__(self, index_object):
         return AbstractVariable(
@@ -260,10 +273,10 @@ class FunctionArray(Array):
         super().__init__(name=name, type=return_type, size=size, value=value, obscurable=obscurable)
         self.arguments = arguments
 
-    def initalize_code(self,obscure,intendation=0):
+    def initalize_code(self,obscure,indentation=0):
         code = "{}{};{}".format(
-            "\t"*intendation,
-            self[self.size.get_name(obscure=obscure,intendation=0)].as_attribute(obscure=obscure),
+            "\t"*indentation,
+            self[self.size.get_name(obscure=obscure,indentation=0)].as_attribute(obscure=obscure),
             "\n" if not obscure else "")
         return code
 
@@ -277,29 +290,61 @@ class FunctionArray(Array):
 
 
 class ArduinoClass():
-    def __init__(self,*attributes,include=None):
-        self.include = include
+    def __init__(self,*attributes,name=None,include=None):
+        if name is not None:
+            self.class_name = name
+        if not hasattr(self,"class_name"):
+            self.class_name = None
+
         for a in attributes:
-            a.obscurable = False
             setattr(self,a.name,a)
+        for attr_name, attribute in {**self.__class__.__dict__,**self.__dict__}.items():
+            if isinstance(attribute,AbstractFunction):
+                attribute.obscurable=False
+                if self.class_name is not None:
+                    attribute.name="{}.{}".format(self.class_name,attribute.name)
+
+        self.include = include
+
 
 class ArduinoStatement():
-    def __init__(self,code,ignore_intendations=False):
-        self.ignore_intendations = ignore_intendations
+    def __init__(self,code,ignore_indentations=False):
+        self.ignore_indentations = ignore_indentations
         self.code = code
 
-    def to_code(self,args,obscure=True,intendation=0):
+    def to_code(self,args,obscure=True,indentation=0):
         code=""
         selfcode=self.code
         if not obscure :
-            code+="\t"*intendation
-            if not self.ignore_intendations:
-                selfcode = selfcode.replace("\i","\t"*intendation)
+            code+="\t"*indentation
+            if not self.ignore_indentations:
+                selfcode = selfcode.replace("\i","\t"*indentation)
         else:
             selfcode =  selfcode.replace("\n","")
         selfcode = selfcode.replace("\i","")
-        code += selfcode.format(*[arg(obscure=obscure,intendation=0 if self.ignore_intendations else intendation+1) for arg in args])
+        code += selfcode.format(*[arg(obscure=obscure,indentation=0 if self.ignore_indentations else indentation+1) for arg in args],*["" for i in range(20)])
         return code
 
     def __call__(self,*args, **kwargs):
-        return partial(self.to_code,args=args)
+        arguments = []
+        for arg in args:
+            try:
+                arg(obscure=False,indentation=0)
+                arguments.append(arg)
+            except:
+                arguments.append(to_abstract_var(arg))
+
+        return partial(self.to_code,args=arguments)
+
+class OneLineStatement(ArduinoStatement):
+
+    def __call__(self,*args, **kwargs):
+        arguments = []
+        for arg in args:
+            try:
+                arg(obscure=False,indentation=0)
+                arguments.append(arg.inline)
+            except:
+                arguments.append(to_abstract_var(arg).inline)
+
+        return partial(self.to_code,args=arguments)

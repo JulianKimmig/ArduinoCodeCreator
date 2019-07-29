@@ -6,23 +6,23 @@ from ArduinoCodeCreator.variable import ArduinoVariable, value_to_lambda, ToCode
 
 
 class ArduinoStatement():
-    def __init__(self,code,ignore_intendations=False):
-        self.ignore_intendations = ignore_intendations
+    def __init__(self,code,ignore_indentations=False):
+        self.ignore_indentations = ignore_indentations
         self.code = code
 
     def __call__(self,*args, **kwargs):
-        def to_code(obscure,intendation):
+        def to_code(obscure,indentation):
             code=""
             selfcode=self.code
             if not obscure :
-                code+="\t"*intendation
-                if not self.ignore_intendations:
-                    selfcode = selfcode.replace("\i","\t"*intendation)
+                code+="\t"*indentation
+                if not self.ignore_indentations:
+                    selfcode = selfcode.replace("\i","\t"*indentation)
             else:
                 selfcode =  selfcode.replace("\n","")
             selfcode = selfcode.replace("\i","")
             #print(self,[arg for arg in args])
-            code += selfcode.format(*[value_to_lambda(arg)(obscure,0 if self.ignore_intendations else intendation+1) for arg in args])
+            code += selfcode.format(*[value_to_lambda(arg)(obscure,0 if self.ignore_indentations else indentation+1) for arg in args])
             return code
         return ToCode(to_code)
 
@@ -30,10 +30,10 @@ class ArduinoFunctionSet:
     def __init__(self,*functions):
         self.functions = functions
 
-    def __call__(self,obscure,intendation):
+    def __call__(self,obscure,indentation):
         code=""
         for func in self.functions:
-            code+=func(obscure=obscure,intendation=intendation)
+            code+=func(obscure=obscure,indentation=indentation)
         return code
 
 class ArduinoFunction(ArduinoVariable):
@@ -60,25 +60,25 @@ class ArduinoFunction(ArduinoVariable):
         self.arguments.append(arduino_variable)
         setattr(self,"arg{}".format(len(self.arguments)),arduino_variable)
 
-    def create_code(self,obscure,intendation):
-        super().create_code(obscure=obscure,intendation=intendation)
+    def create_code(self,obscure,indentation):
+        super().create_code(obscure=obscure,indentation=indentation)
 
         code = "{} {}({}){{".format(self.arduino_data_type,self,", ".join([
             arg.to_argument()
-            #"{} {}".format(arg.arduino_data_type,arg(obscure=obscure,intendation=0))
+            #"{} {}".format(arg.arduino_data_type,arg(obscure=obscure,indentation=0))
             for arg in self.arguments]))
         if not obscure:
             code+="\n"
-        code+=self.create_inner_code(obscure=obscure,intendation=intendation)
+        code+=self.create_inner_code(obscure=obscure,indentation=indentation)
         code+="}"
         if not obscure:
             code+="\n"
         return code
 
-    def create_inner_code(self,obscure,intendation):
+    def create_inner_code(self,obscure,indentation):
         code = ""
         for func in self.functions:
-            code +=func(obscure,intendation=intendation+1)
+            code +=func(obscure,indentation=indentation+1)
         return code
 
     def add_variable(self,*variables):
@@ -105,12 +105,12 @@ class ArduinoFunction(ArduinoVariable):
 
     def __call__(self, *args):
         assert len(args) == len(self.arguments), "function call {}: invalid argumen length ({}) and ({})".format(self.name,", ".join([str(arg) for arg in args]),", ".join([str(argument) for argument in self.arguments]))
-        def to_code(obscure,intendation):
+        def to_code(obscure,indentation):
             code=""
             if not obscure:
-                code+="\t"*intendation
-            #print([value_to_lambda(arg)(obscure=obscure,intendation=0) for arg in args])
-            code += "{}({});".format(self,",".join([re.sub(";$","",re.sub("\n$","",value_to_lambda(arg)(obscure=obscure,intendation=0)))
+                code+="\t"*indentation
+            #print([value_to_lambda(arg)(obscure=obscure,indentation=0) for arg in args])
+            code += "{}({});".format(self,",".join([re.sub(";$","",re.sub("\n$","",value_to_lambda(arg)(obscure=obscure,indentation=0)))
                                                     for arg in args]))+("" if obscure else "\n")
             return code
 
@@ -128,16 +128,16 @@ class ArduinoFunctionArray(ArduinoFunction,ArduinoVariableArray):
         super().__init__(*args, **kwargs)
         self.array_size = array_size
 
-    def create_code(self,obscure,intendation):
-        super().create_code(obscure=obscure,intendation=intendation)
-        code = "{} (*{}[{}])({});".format(self.arduino_data_type,self,self.array_size,", ".join(["{} {}".format(arg.arduino_data_type,arg(obscure=obscure,intendation=0)) for arg in self.arguments]))
+    def create_code(self,obscure,indentation):
+        super().create_code(obscure=obscure,indentation=indentation)
+        code = "{} (*{}[{}])({});".format(self.arduino_data_type,self,self.array_size,", ".join(["{} {}".format(arg.arduino_data_type,arg(obscure=obscure,indentation=0)) for arg in self.arguments]))
         if not obscure:
             code+="\n"
         return code
 
     def __call__(self, index,*args):
         supercall = super().__call__
-        def to_code(obscure,intendation):
-            return supercall(*args)(obscure,intendation).replace("{}(".format(self),"{}(".format(self.get(index)(obscure,0)))
+        def to_code(obscure,indentation):
+            return supercall(*args)(obscure,indentation).replace("{}(".format(self),"{}(".format(self.get(index)(obscure,0)))
 
         return ToCode(to_code)
