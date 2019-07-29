@@ -13,7 +13,7 @@ def lambda_abstract_var_name(obscure,intendation,abstract_variable):
     return "{}{};{}".format("\t"*intendation,abstract_variable.get_name(obscure=obscure,intendation=intendation),"\n" if not obscure else "")
 
 def lambda_operation(obscure,intendation,var1,var2,operator):
-    return "({}{}{})".format(var1.inline(obscure=obscure,intendation=0),operator,var2.inline(obscure=obscure,intendation=0))
+    return "({}{}{})".format(var1 if isinstance(var1,str) else var1.inline(obscure=obscure,intendation=0),operator,var2 if isinstance(var2,str) else var2.inline(obscure=obscure,intendation=0))
 
 def lambda_remove_tabs_newline(obscure,intendation,func):
     return re.sub(";$","",func(obscure=obscure,intendation=intendation).replace("\t","").replace("\n",""))
@@ -55,6 +55,9 @@ class AbstractVariable(AbstractStructureType):
         other = to_abstract_var(other)
         return AbstractVariable(partial(lambda_operation,var1=self,var2=other,operator=operation),dt.add_types(self.type,other.type),obscurable=False,settable=False)
 
+    def variable_modifier(self,operation):
+        return AbstractVariable(partial(lambda_operation,var1="",var2=self,operator=operation),self.type,obscurable=False,settable=False)
+
     def to_pointer(self):
         return AbstractVariable(
             name=lambda obscure,intendation:"*{}".format(self.get_name(obscure=obscure)),
@@ -77,10 +80,14 @@ class AbstractVariable(AbstractStructureType):
     __ne__ = partialmethod(math_operation,operation = "!=")
     __rshift__ = partialmethod(math_operation,operation = ">>")
     __lshift__ = partialmethod(math_operation,operation = ">>")
+    __or__ =  partialmethod(math_operation,operation = "|")
+    __and__ =  partialmethod(math_operation,operation = "&")
+    __xor__= partialmethod(math_operation,operation = "^")
 
-    def __neg__(self):
-        return AbstractVariable(lambda obscure,intendation:"-{}".format(self.inline(obscure=obscure,intendation=0)),self.type,obscurable=False,settable=False)
-
+    __neg__ = partialmethod(variable_modifier,operation = "-")
+    __invert__ = partialmethod(variable_modifier,operation = "~")
+    #def __invert__(self):
+    #    return AbstractVariable(lambda obscure,intendation:"~{}".format(self.inline(obscure=obscure,intendation=0)),self.type,obscurable=False,settable=False)
 
 def to_abstract_var(value):
     if isinstance(value,AbstractVariable):

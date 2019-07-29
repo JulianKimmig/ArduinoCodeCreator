@@ -91,7 +91,7 @@ if __name__ == "__main__":
         var1.set(func1.arg2*func1.var1),
         func1.arg1[var1].set(10),
         func1.arg1[2].set(var1%3),
-        var1>>3
+        ((var1|(D1&var1))^D1 + ~var1) >>3
     )
 
     acc.setup.add_call(
