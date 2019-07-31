@@ -59,7 +59,7 @@ class ForStatement(ArduinoStatement):
         )
         continue_condition = continue_condition.inline
         try:
-            _ = 1 + raising_value
+            raising_value = 1 + raising_value -1
             if raising_value < 0:
                 raising_value = count_vaiable.set(count_vaiable - abs(raising_value))
             else:
