@@ -8,6 +8,7 @@ from ArduinoCodeCreator.basic_types import (
     Array,
     FunctionArray,
     ArduinoClass,
+    ArduinoEnum,
 )
 from ArduinoCodeCreator.statements import for_
 
@@ -20,6 +21,7 @@ class ArduinoCodeCreator:
         self.global_variables = []
         self.functions = []
         self.includes = []
+        self.enums = []
         self.setup = Function(return_type=dt.void, name="setup", obscurable=False)
         self.loop = Function(return_type=dt.void, name="loop", obscurable=False)
 
@@ -27,8 +29,12 @@ class ArduinoCodeCreator:
         self.add(self.setup)
         self.add(self.loop)
         code = ""
+
         for definition in self.definitions:
             code += definition.initalize_code(obscure=obscure, indentation=0)
+
+        for enum in self.enums:
+            code += enum.initalize_code(obscure=obscure, indentation=0)
 
         for includeclass in self.classes:
             code += (
@@ -54,10 +60,13 @@ class ArduinoCodeCreator:
             return self.add_global_variable(arduino_object)
         if isinstance(arduino_object, ArduinoClass):
             return self.add_class(arduino_object)
-        # if isinstance(arduino_object,ArduinoInclude):
-        #    return self.add_include(arduino_object)
-
-        return None
+        if isinstance(arduino_object, ArduinoEnum):
+            return self.add_enum(arduino_object)
+        raise AttributeError(
+            "class {} not addable to code creator".format(
+                arduino_object.__class__.__name__
+            )
+        )
 
     def add_definition(self, arduino_object):
         self.definitions.append(arduino_object)
@@ -77,6 +86,10 @@ class ArduinoCodeCreator:
 
     def add_class(self, arduino_object):
         self.classes.append(arduino_object)
+        return arduino_object
+
+    def add_enum(self, arduino_object):
+        self.enums.append(arduino_object)
         return arduino_object
 
 

@@ -154,7 +154,7 @@ def to_abstract_var(value):
         return value
     else:
         if value is None:
-            value = "null"
+            return None
         try:
             value(obscure=False, indentation=0)
         except:
@@ -191,7 +191,7 @@ class Definition(AbstractVariable):
 class Variable(AbstractVariable):
     def __init__(self, name=None, type=uint8_t, value=None, obscurable=True):
         super().__init__(name=name, type=type, obscurable=obscurable)
-        self.value = value
+        self.value = to_abstract_var(value)
 
     def initalize_code(self, obscure, indentation=0):
         code = "{}{} {}".format(
@@ -496,10 +496,57 @@ class ArduinoEnum:
     def __init__(self, name, possibilities, type=uint8_t):
         self.type = type
         self.name = name
-        self.possibilities = possibilities
-        self.possibilities_description = {
-            key: self.possibilities[key][1] for key in self.possibilities
-        }
+        self.possibilities = {}
+        self.first_free_value = 0
+
+        for value, data in possibilities.items():
+            keyword = data
+            desc = keyword
+            if not isinstance(keyword, str) and hasattr(keyword, "__iter__"):
+                keyword, desc = (
+                    keyword[0],
+                    keyword[0] if len(keyword) == 1 else keyword[1],
+                )
+            self.add_possibility(keyword=keyword, value=value, description=desc)
+
+    def add_possibility(self, keyword, value=None, description=None, size=1):
+        keyword = to_abstract_var(keyword)
+        if value is None:
+            value = self.first_free_value
+        self.possibilities[value] = (
+            keyword,
+            description if description is not None else keyword,
+        )
+        self.first_free_value = value + size
+
+    def initalize_code(self, obscure=False, indentation=0):
+        newline = "\n" if not obscure else ""
+        tabint1, tabint2 = (
+            ("", "") if obscure else ("\t" * indentation, "\t" * (indentation + 1))
+        )
+        code = (
+            "{}typedef enum{{{}".format(tabint1, newline)
+            + "".join(
+                [
+                    "{}{}_{}={},//{}{}".format(
+                        tabint2,
+                        self,
+                        data[0].inline(obscure=obscure),
+                        key,
+                        data[1],
+                        newline,
+                    )
+                    for key, data in self.possibilities.items()
+                ]
+            )
+            + "{}}}{}{};{}".format(tabint1, newline, self, newline)
+        )
+        return code
+
+    def get(self, arduiono_variable):
+        return lambda obscure, indentation: "{}_{}".format(
+            self, arduiono_variable.inline(obscure=obscure)
+        )
 
     def __str__(self):
         return self.name
