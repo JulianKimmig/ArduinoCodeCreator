@@ -7,6 +7,7 @@ class ArduinoBaseClass(ArduinoClass):
     INPUT = Variable("INPUT", obscurable=False)
     OUTPUT = Variable("OUTPUT", obscurable=False)
     INPUT_PULLUP = Variable("INPUT_PULLUP", obscurable=False)
+    EXTERNAL = Variable("EXTERNAL", obscurable=False)
 
     digitalRead = Function("digitalRead", [uint8_t], uint8_t)
     digitalWrite = Function("digitalWrite", [uint8_t, uint8_t])
@@ -14,6 +15,8 @@ class ArduinoBaseClass(ArduinoClass):
 
     analogRead = Function("analogRead", [uint8_t], uint16_t)
     analogWrite = Function("analogWrite", [uint8_t, uint8_t])
+    analogReference = Function("analogReference", [uint8_t])
+
 
     random = Function("random", arguments=[], return_type=uint16_t)
     randomSeed = Function(name="randomSeed", arguments=[uint32_t])
@@ -23,7 +26,7 @@ class ArduinoBaseClass(ArduinoClass):
     millis = Function(return_type=uint32_t, name="millis")
     max = Function(return_type=uint32_t, name="max", arguments=[uint32_t, uint32_t])
     min = Function(return_type=uint32_t, name="min", arguments=[uint32_t, uint32_t])
-    delay = Function(name="delay", arguments=[uint32_t, uint32_t])
+    delay = Function(name="delay", arguments=[uint32_t])
     sizeof = Function(name="sizeof", arguments=[uint32_t])
 
 
