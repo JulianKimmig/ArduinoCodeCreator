@@ -8,6 +8,8 @@ class ArduinoBaseClass(ArduinoClass):
     OUTPUT = Variable("OUTPUT", obscurable=False)
     INPUT_PULLUP = Variable("INPUT_PULLUP", obscurable=False)
     EXTERNAL = Variable("EXTERNAL", obscurable=False)
+    LOW = Variable("LOW", obscurable=False)
+    HIGH = Variable("HIGH", obscurable=False)
 
     digitalRead = Function("digitalRead", [uint8_t], uint8_t)
     digitalWrite = Function("digitalWrite", [uint8_t, uint8_t])
