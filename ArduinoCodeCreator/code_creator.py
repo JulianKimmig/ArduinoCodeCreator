@@ -9,8 +9,9 @@ from ArduinoCodeCreator.basic_types import (
     FunctionArray,
     ArduinoClass,
     ArduinoEnum,
-)
+    Include, AbstractStructureType)
 from ArduinoCodeCreator.statements import for_
+
 
 
 class ArduinoCodeCreator:
@@ -36,12 +37,8 @@ class ArduinoCodeCreator:
         for enum in self.enums:
             code += enum.initalize_code(obscure=obscure, indentation=0)
 
-        for includeclass in self.classes:
-            code += (
-                "#include {}\n".format(includeclass.include)
-                if includeclass.include is not None
-                else ""
-            )
+        for include in self.includes:
+            code += include.include(obscure=obscure, indentation=0)
 
         for global_variable in self.global_variables:
             code += global_variable.initalize_code(obscure=obscure, indentation=0)
@@ -62,6 +59,8 @@ class ArduinoCodeCreator:
             return self.add_class(arduino_object)
         if isinstance(arduino_object, ArduinoEnum):
             return self.add_enum(arduino_object)
+        if isinstance(arduino_object, Include):
+            return self.add_include(arduino_object)
         raise AttributeError(
             "class {} not addable to code creator".format(
                 arduino_object.__class__.__name__
@@ -107,7 +106,6 @@ class ArduinoCodeCreator:
         return arduino_object
 
     def add_include(self, arduino_object):
-
         self.includes.append(arduino_object)
         return arduino_object
 
@@ -121,6 +119,16 @@ class ArduinoCodeCreator:
             i+=1
             arduino_object.class_name = "{}_{}".format(basename,i)
         self.classes.append(arduino_object)
+
+        for name,attribute in arduino_object.__dict__.items():
+            if isinstance(attribute,AbstractStructureType):
+                try:
+                    self.add(attribute)
+                except AttributeError:
+                    pass
+        #if arduino_object.include is not None:
+         #   print(arduino_object.include.__class__)
+         #   self.add_include(arduino_object.include)
         return arduino_object
 
     def add_enum(self, arduino_object):

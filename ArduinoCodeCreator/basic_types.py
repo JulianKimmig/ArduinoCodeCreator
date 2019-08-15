@@ -53,7 +53,8 @@ class AbstractStructureType:
     def get_name(self, obscure, indentation=0):
         n = self._obscure_name if obscure and self.obscurable else self.name
         try:
-            return n(obscure=obscure, indentation=indentation)
+            while True:
+                n =  n(obscure=obscure, indentation=indentation)
         except Exception as e:
             # import traceback
             # print(traceback.format_exc())
@@ -92,9 +93,16 @@ class AbstractVariable(AbstractStructureType):
             settable=False,
         )
 
-    def variable_modifier(self, operation):
+    def variable_premodifier(self, operation):
         return AbstractVariable(
             partial(lambda_operation, var1="", var2=self, operator=operation),
+            self.type,
+            obscurable=False,
+            settable=False,
+        )
+    def variable_postmodifier(self, operation):
+        return AbstractVariable(
+            partial(lambda_operation, var1=self, var2="", operator=operation),
             self.type,
             obscurable=False,
             settable=False,
@@ -139,9 +147,10 @@ class AbstractVariable(AbstractStructureType):
     __or__ = partialmethod(math_operation, operation="|")
     __and__ = partialmethod(math_operation, operation="&")
     __xor__ = partialmethod(math_operation, operation="^")
-    __neg__ = partialmethod(variable_modifier, operation="-")
-    __invert__ = partialmethod(variable_modifier, operation="~")
+    __neg__ = partialmethod(variable_premodifier, operation="-")
+    __invert__ = partialmethod(variable_premodifier, operation="~")
 
+    increment = partialmethod(variable_postmodifier, operation="++")
     or_ = partialmethod(math_operation, operation="||")
     and_ = partialmethod(math_operation, operation="&&")
 
@@ -207,6 +216,9 @@ class Variable(AbstractVariable):
     def initalize(self):
         return self.initalize_code
 
+    def reinitalize(self):
+        return self.set(self.value)
+
     def set(self, value=None):
         return partial(self.set_code, value=to_abstract_var(value))
 
@@ -268,6 +280,7 @@ class AbstractFunction(AbstractVariable):
             ", ".join([str(argument) for argument in self.arguments]),
         )
 
+        #print(self.name,[args[i]for i in range(len(args))])
         argvars = [
             (
                 to_abstract_var(args[i]).cast(self.arguments[i].type)
@@ -283,6 +296,7 @@ class AbstractFunction(AbstractVariable):
                 ",".join([arg.get_name(obscure=obscure) for arg in argvars]),
             ),
             type=self.type,
+            obscurable=False
         )
 
     def as_attribute(self, obscure):
@@ -337,7 +351,7 @@ class Function(AbstractFunction):
                 c = partial(lambda_abstract_var_name, abstract_variable=c)
             self.inner_calls.append(c)
 
-    def prepent_call(self, *call):
+    def prepend_call(self, *call):
         for c in reversed(call):
             if isinstance(c, AbstractVariable):
                 c = partial(lambda_abstract_var_name, abstract_variable=c)
@@ -492,10 +506,11 @@ class OneLineStatement(ArduinoStatement):
         return partial(self.to_code, args=arguments)
 
 
-class ArduinoEnum:
+class ArduinoEnum(AbstractStructureType):
     def __init__(self, name, possibilities, type=uint8_t):
-        self.type = type
-        self.name = name
+        super().__init__(name=name, type=type)
+        #self.type = type
+        #self.name = name
         self.possibilities = {}
         self.first_free_value = 0
 
@@ -511,13 +526,21 @@ class ArduinoEnum:
 
     def add_possibility(self, keyword, value=None, description=None, size=1):
         keyword = to_abstract_var(keyword)
+        keywordvar = Variable(name="{}_{}".format(self,keyword.name),type=self.type,value=0)
+        keywordvar.original_name = str(keyword)
         if value is None:
             value = self.first_free_value
         self.possibilities[value] = (
-            keyword,
-            description if description is not None else keyword,
+            keywordvar,
+            description if description is not None else keywordvar,
         )
         self.first_free_value = value + size
+
+    def __getitem__(self, item):
+        for key, data in self.possibilities.items():
+            if data[0].original_name == str(item):
+                return data[0]
+        return AbstractVariable(None)
 
     def initalize_code(self, obscure=False, indentation=0):
         newline = "\n" if not obscure else ""
@@ -528,9 +551,8 @@ class ArduinoEnum:
             "{}typedef enum{{{}".format(tabint1, newline)
             + "".join(
                 [
-                    "{}{}_{}={},//{}{}".format(
+                    "{}{}={},//{}{}".format(
                         tabint2,
-                        self,
                         data[0].inline(obscure=obscure),
                         key,
                         data[1],
@@ -544,9 +566,10 @@ class ArduinoEnum:
         return code
 
     def get(self, arduiono_variable):
-        return lambda obscure, indentation: "{}_{}".format(
-            self, arduiono_variable.inline(obscure=obscure)
-        )
+        return to_abstract_var(lambda obscure, indentation: self[arduiono_variable.name].get_name(obscure=obscure, indentation=indentation))
+        #return : "{}_{}".format(
+        #    self, arduiono_variable.inline(obscure=obscure)
+        #)
 
     def __str__(self):
         return self.name
@@ -598,6 +621,12 @@ class ArduinoClassInstance(Variable):
                 )
                 setattr(self, attr_name, new_attribute)
 
+class Include(AbstractStructureType):
+    def __init__(self,code):
+        super().__init__(name=code,obscurable=False)
+
+    def include(self, obscure=False, indentation=0):
+        return "{}#include {}\n".format("".join(['t' for i in range(indentation)]),self.get_name(obscure=obscure,indentation=0))
 
 class ArduinoClass(AbstractStructureType):
     def __init__(self, *attributes, class_name=None, include=None):
@@ -622,16 +651,18 @@ class ArduinoClass(AbstractStructureType):
                     return_type=attribute.type,
                 )
                 setattr(self, attr_name, new_attribute)
-            if isinstance(attribute, Variable):
+            elif isinstance(attribute, Variable):
                 new_attribute = ArduinoClassInstanceVariable(
                     self, attribute.name, obscurable=False, type=attribute.type
                 )
                 setattr(self, attr_name, new_attribute)
+            elif isinstance(attribute, AbstractStructureType):
+                setattr(self, attr_name, attribute)
 
         if include is None:
             if hasattr(self, "include"):
                 include = self.include
-        self.include = include
+        self.include = Include(include)
 
     def get_name(self, obscure, indentation=0):
         return self.class_name
