@@ -10,6 +10,8 @@ class ArduinoBaseClass(ArduinoClass):
     EXTERNAL = Variable("EXTERNAL", obscurable=False)
     LOW = Variable("LOW", obscurable=False)
     HIGH = Variable("HIGH", obscurable=False)
+    true = Variable("true", obscurable=False)
+    false = Variable("false", obscurable=False)
 
     digitalRead = Function("digitalRead", [uint8_t], uint8_t)
     digitalWrite = Function("digitalWrite", [uint8_t, uint8_t])
