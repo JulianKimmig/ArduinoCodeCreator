@@ -54,7 +54,7 @@ class AbstractStructureType:
         n = self._obscure_name if obscure and self.obscurable else self.name
         try:
             while True:
-                n =  n(obscure=obscure, indentation=indentation)
+                n = n(obscure=obscure, indentation=indentation)
         except Exception as e:
             # import traceback
             # print(traceback.format_exc())
@@ -100,6 +100,7 @@ class AbstractVariable(AbstractStructureType):
             obscurable=False,
             settable=False,
         )
+
     def variable_postmodifier(self, operation):
         return AbstractVariable(
             partial(lambda_operation, var1=self, var2="", operator=operation),
@@ -280,7 +281,7 @@ class AbstractFunction(AbstractVariable):
             ", ".join([str(argument) for argument in self.arguments]),
         )
 
-        #print(self.name,[args[i]for i in range(len(args))])
+        # print(self.name,[args[i]for i in range(len(args))])
         argvars = [
             (
                 to_abstract_var(args[i]).cast(self.arguments[i].type)
@@ -296,7 +297,7 @@ class AbstractFunction(AbstractVariable):
                 ",".join([arg.get_name(obscure=obscure) for arg in argvars]),
             ),
             type=self.type,
-            obscurable=False
+            obscurable=False,
         )
 
     def as_attribute(self, obscure):
@@ -509,8 +510,8 @@ class OneLineStatement(ArduinoStatement):
 class ArduinoEnum(AbstractStructureType):
     def __init__(self, name, possibilities, type=uint8_t):
         super().__init__(name=name, type=type)
-        #self.type = type
-        #self.name = name
+        # self.type = type
+        # self.name = name
         self.possibilities = {}
         self.first_free_value = 0
 
@@ -526,7 +527,9 @@ class ArduinoEnum(AbstractStructureType):
 
     def add_possibility(self, keyword, value=None, description=None, size=1):
         keyword = to_abstract_var(keyword)
-        keywordvar = Variable(name="{}_{}".format(self,keyword.name),type=self.type,value=0)
+        keywordvar = Variable(
+            name="{}_{}".format(self, keyword.name), type=self.type, value=0
+        )
         keywordvar.original_name = str(keyword)
         if value is None:
             value = self.first_free_value
@@ -552,11 +555,7 @@ class ArduinoEnum(AbstractStructureType):
             + "".join(
                 [
                     "{}{}={},//{}{}".format(
-                        tabint2,
-                        data[0].inline(obscure=obscure),
-                        key,
-                        data[1],
-                        newline,
+                        tabint2, data[0].inline(obscure=obscure), key, data[1], newline
                     )
                     for key, data in self.possibilities.items()
                 ]
@@ -566,10 +565,14 @@ class ArduinoEnum(AbstractStructureType):
         return code
 
     def get(self, arduiono_variable):
-        return to_abstract_var(lambda obscure, indentation: self[arduiono_variable.name].get_name(obscure=obscure, indentation=indentation))
-        #return : "{}_{}".format(
+        return to_abstract_var(
+            lambda obscure, indentation: self[arduiono_variable.name].get_name(
+                obscure=obscure, indentation=indentation
+            )
+        )
+        # return : "{}_{}".format(
         #    self, arduiono_variable.inline(obscure=obscure)
-        #)
+        # )
 
     def __str__(self):
         return self.name
@@ -621,15 +624,21 @@ class ArduinoClassInstance(Variable):
                 )
                 setattr(self, attr_name, new_attribute)
 
+
 class Include(AbstractStructureType):
-    def __init__(self,code):
-        super().__init__(name=code,obscurable=False)
+    def __init__(self, code):
+        super().__init__(name=code, obscurable=False)
 
     def include(self, obscure=False, indentation=0):
-        return "{}#include {}\n".format("".join(['t' for i in range(indentation)]),self.get_name(obscure=obscure,indentation=0))
+        return "{}#include {}\n".format(
+            "".join(["t" for i in range(indentation)]),
+            self.get_name(obscure=obscure, indentation=0),
+        )
+
 
 class ArduinoClass(AbstractStructureType):
     include = None
+
     def __init__(self, *attributes, class_name=None, include=None):
         if class_name is None:
             if hasattr(self, "class_name"):

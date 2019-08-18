@@ -60,8 +60,8 @@ int64_t = ArduinoDataType("int64_t")
 bool_ = ArduinoDataType("bool")
 boolean = bool_
 void = ArduinoDataType("void")
-float_ = ArduinoDataType("float",python_type=np.float32)
-double_ = ArduinoDataType("float",python_type=np.float32)
+float_ = ArduinoDataType("float", python_type=np.float32)
+double_ = ArduinoDataType("float", python_type=np.float32)
 long_ = int32_t
 
 uint8_t_pointer = ArduinoDataType("uint8_t*", python_type=np.uint8)

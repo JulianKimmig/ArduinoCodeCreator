@@ -9,9 +9,10 @@ from ArduinoCodeCreator.basic_types import (
     FunctionArray,
     ArduinoClass,
     ArduinoEnum,
-    Include, AbstractStructureType)
+    Include,
+    AbstractStructureType,
+)
 from ArduinoCodeCreator.statements import for_
-
 
 
 class ArduinoCodeCreator:
@@ -71,11 +72,13 @@ class ArduinoCodeCreator:
         for definition in self.definitions:
             if id(definition) == id(arduino_object):
                 return definition
-        i=0
+        i = 0
         basename = arduino_object.name
-        while any([True for obj in self.definitions if obj.name == arduino_object.name]):
-            i+=1
-            arduino_object.name = "{}_{}".format(basename,i)
+        while any(
+            [True for obj in self.definitions if obj.name == arduino_object.name]
+        ):
+            i += 1
+            arduino_object.name = "{}_{}".format(basename, i)
         self.definitions.append(arduino_object)
         return arduino_object
 
@@ -83,12 +86,14 @@ class ArduinoCodeCreator:
         for var in self.global_variables:
             if id(var) == id(arduino_object):
                 return var
-        i=0
+        i = 0
         basename = str(arduino_object.name)
-        while any([True for obj in self.global_variables if obj.name == arduino_object.name]):
+        while any(
+            [True for obj in self.global_variables if obj.name == arduino_object.name]
+        ):
             print([obj.name for obj in self.global_variables])
-            i+=1
-            arduino_object.name = "{}_{}".format(basename,i)
+            i += 1
+            arduino_object.name = "{}_{}".format(basename, i)
 
         self.global_variables.append(arduino_object)
         return arduino_object
@@ -97,11 +102,11 @@ class ArduinoCodeCreator:
         for var in self.functions:
             if id(var) == id(arduino_object):
                 return var
-        i=0
+        i = 0
         basename = arduino_object.name
         while any([True for obj in self.functions if obj.name == arduino_object.name]):
-            i+=1
-            arduino_object.name = "{}_{}".format(basename,i)
+            i += 1
+            arduino_object.name = "{}_{}".format(basename, i)
         self.functions.append(arduino_object)
         return arduino_object
 
@@ -113,33 +118,39 @@ class ArduinoCodeCreator:
         for var in self.classes:
             if id(var) == id(arduino_object):
                 return var
-        i=0
+        i = 0
         basename = arduino_object.class_name
-        while any([True for obj in self.classes if obj.class_name == arduino_object.class_name]):
-            i+=1
-            arduino_object.class_name = "{}_{}".format(basename,i)
+        while any(
+            [
+                True
+                for obj in self.classes
+                if obj.class_name == arduino_object.class_name
+            ]
+        ):
+            i += 1
+            arduino_object.class_name = "{}_{}".format(basename, i)
         self.classes.append(arduino_object)
 
-        for name,attribute in arduino_object.__dict__.items():
-            if isinstance(attribute,AbstractStructureType):
+        for name, attribute in arduino_object.__dict__.items():
+            if isinstance(attribute, AbstractStructureType):
                 try:
                     self.add(attribute)
                 except AttributeError:
                     pass
-        #if arduino_object.include is not None:
-         #   print(arduino_object.include.__class__)
-         #   self.add_include(arduino_object.include)
+        # if arduino_object.include is not None:
+        #   print(arduino_object.include.__class__)
+        #   self.add_include(arduino_object.include)
         return arduino_object
 
     def add_enum(self, arduino_object):
         for var in self.enums:
             if id(var) == id(arduino_object):
                 return var
-        i=0
+        i = 0
         basename = arduino_object.name
         while any([True for obj in self.enums if obj.name == arduino_object.name]):
-            i+=1
-            arduino_object.name = "{}_{}".format(basename,i)
+            i += 1
+            arduino_object.name = "{}_{}".format(basename, i)
         self.enums.append(arduino_object)
         return arduino_object
 

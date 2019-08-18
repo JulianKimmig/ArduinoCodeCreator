@@ -21,7 +21,6 @@ class ArduinoBaseClass(ArduinoClass):
     analogWrite = Function("analogWrite", [uint8_t, uint8_t])
     analogReference = Function("analogReference", [uint8_t])
 
-
     random = Function("random", arguments=[], return_type=uint16_t)
     randomSeed = Function(name="randomSeed", arguments=[uint32_t])
     memcpy = Function(
