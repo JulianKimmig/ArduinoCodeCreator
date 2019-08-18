@@ -143,7 +143,7 @@ class AbstractVariable(AbstractStructureType):
     __eq__ = partialmethod(math_operation, operation="==")
     __ne__ = partialmethod(math_operation, operation="!=")
     __rshift__ = partialmethod(math_operation, operation=">>")
-    __lshift__ = partialmethod(math_operation, operation=">>")
+    __lshift__ = partialmethod(math_operation, operation="<<")
     __or__ = partialmethod(math_operation, operation="|")
     __and__ = partialmethod(math_operation, operation="&")
     __xor__ = partialmethod(math_operation, operation="^")
@@ -629,6 +629,7 @@ class Include(AbstractStructureType):
         return "{}#include {}\n".format("".join(['t' for i in range(indentation)]),self.get_name(obscure=obscure,indentation=0))
 
 class ArduinoClass(AbstractStructureType):
+    include = None
     def __init__(self, *attributes, class_name=None, include=None):
         if class_name is None:
             if hasattr(self, "class_name"):
@@ -659,10 +660,10 @@ class ArduinoClass(AbstractStructureType):
             elif isinstance(attribute, AbstractStructureType):
                 setattr(self, attr_name, attribute)
 
-        if include is None:
-            if hasattr(self, "include"):
-                include = self.include
-        self.include = Include(include)
+        if include is not None:
+            self.include = include
+        if self.include is not None:
+            self.include = Include(self.include)
 
     def get_name(self, obscure, indentation=0):
         return self.class_name
