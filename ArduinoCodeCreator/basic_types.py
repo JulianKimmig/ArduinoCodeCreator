@@ -537,7 +537,10 @@ class ArduinoEnum(AbstractStructureType):
             keywordvar,
             description if description is not None else keywordvar,
         )
-        self.first_free_value = value + size
+        try:
+            self.first_free_value = value + size
+        except:
+            self.first_free_value += size
 
     def __getitem__(self, item):
         for key, data in self.possibilities.items():

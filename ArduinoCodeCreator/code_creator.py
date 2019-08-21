@@ -35,11 +35,11 @@ class ArduinoCodeCreator:
         for definition in self.definitions:
             code += definition.initalize_code(obscure=obscure, indentation=0)
 
-        for enum in self.enums:
-            code += enum.initalize_code(obscure=obscure, indentation=0)
-
         for include in self.includes:
             code += include.include(obscure=obscure, indentation=0)
+
+        for enum in self.enums:
+            code += enum.initalize_code(obscure=obscure, indentation=0)
 
         for global_variable in self.global_variables:
             code += global_variable.initalize_code(obscure=obscure, indentation=0)
