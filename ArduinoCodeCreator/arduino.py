@@ -30,6 +30,7 @@ class ArduinoBaseClass(ArduinoClass):
     max = Function(return_type=uint32_t, name="max", arguments=[uint32_t, uint32_t])
     min = Function(return_type=uint32_t, name="min", arguments=[uint32_t, uint32_t])
     delay = Function(name="delay", arguments=[uint32_t])
+    delayMicroseconds = Function(name="delayMicroseconds", arguments=[uint32_t])
     sizeof = Function(name="sizeof", arguments=[uint32_t])
 
 
