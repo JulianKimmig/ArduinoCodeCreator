@@ -32,6 +32,7 @@ class ArduinoBaseClass(ArduinoClass):
     delay = Function(name="delay", arguments=[uint32_t])
     delayMicroseconds = Function(name="delayMicroseconds", arguments=[uint32_t])
     sizeof = Function(name="sizeof", arguments=[uint32_t])
+    map = Function(return_type=uint32_t, name="map", arguments=[uint32_t,uint32_t, uint32_t,uint32_t, uint32_t])
 
 
 Arduino = ArduinoBaseClass()
