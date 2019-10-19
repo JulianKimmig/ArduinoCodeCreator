@@ -3,7 +3,7 @@ from ArduinoCodeCreator.basic_types import Function, ArduinoClass, Array, Variab
 
 
 class ArduinoBaseClass(ArduinoClass):
-    class_name="Arduino"
+
     # Digital I/O
     INPUT = Variable("INPUT", obscurable=False)
     OUTPUT = Variable("OUTPUT", obscurable=False)

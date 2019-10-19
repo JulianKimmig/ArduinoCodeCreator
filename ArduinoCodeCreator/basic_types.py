@@ -454,6 +454,29 @@ class FunctionArray(Array):
             obscurable=False,
         )
 
+class FunctionPointer(Function):
+    def __init__(
+            self,
+            name=None,
+            return_type=uint8_t,
+            arguments=None,
+            value=None,
+            obscurable=True,
+    ):
+        super().__init__(
+            name=name, return_type=return_type,arguments=arguments, obscurable=obscurable
+        )
+
+
+    def initalize_code(self, obscure, indentation=0):
+        code = "{}{};{}".format(
+            "\t" * indentation,
+            self.as_attribute(
+                obscure=obscure
+            ),
+            "\n" if not obscure else "",
+            )
+        return code
 
 class ArduinoStatement:
     def __init__(self, code, ignore_indentations=False):
