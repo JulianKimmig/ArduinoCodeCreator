@@ -199,13 +199,14 @@ class Definition(AbstractVariable):
 
 
 class Variable(AbstractVariable):
-    def __init__(self, name=None, type=uint8_t, value=None, obscurable=True):
+    def __init__(self, name=None, type=uint8_t, value=None, obscurable=True,constant=False):
         super().__init__(name=name, type=type, obscurable=obscurable)
+        self.constant = constant
         self.value = to_abstract_var(value)
 
     def initalize_code(self, obscure, indentation=0):
-        code = "{}{} {}".format(
-            "\t" * indentation, self.type, self.get_name(obscure=obscure)
+        code = "{}{}{} {}".format(
+            "\t" * indentation,"const "if self.constant else "", self.type, self.get_name(obscure=obscure)
         )
         if self.value is not None:
             code += "={}".format(self.value)
