@@ -342,7 +342,17 @@ class Function(AbstractFunction):
             self.add_call(*code)
 
     def add_variable(self, arduino_variable):
+        arg_names =  [arg.name for arg in self.arguments] + [arg.name for arg in self.variables]
         self.variables.append(arduino_variable)
+
+        if(arduino_variable.name in arg_names):
+            i=1
+            newname = f"{arduino_variable.name}_{i}"
+            while(newname in arg_names):
+                i+=1
+                newname = f"{arduino_variable.name}_{i}"
+            arduino_variable.name = newname
+
         self.add_call(arduino_variable.initalize())
         setattr(self, "var{}".format(len(self.variables)), arduino_variable)
         return arduino_variable
