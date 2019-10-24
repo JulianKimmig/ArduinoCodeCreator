@@ -89,3 +89,4 @@ while_ = WhileStatement()
 
 return_ = OneLineStatement("return {};\n", ignore_indentations=True)
 continue_ = OneLineStatement("continue;\n", ignore_indentations=True)
+break_ = OneLineStatement("break;\n", ignore_indentations=True)
