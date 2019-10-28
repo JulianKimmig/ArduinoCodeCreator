@@ -117,6 +117,14 @@ class AbstractVariable(AbstractStructureType):
             type=self.type,
         ).cast(type.to_pointer())
 
+    def dereference(self):
+        return AbstractVariable(
+            name=lambda obscure, indentation: "*{}".format(
+                self.get_name(obscure=obscure)
+            ),
+            type=self.type,
+        )
+
     def cast(self, datatype):
         return AbstractVariable(
             name=lambda obscure, indentation: "(({}){})".format(
