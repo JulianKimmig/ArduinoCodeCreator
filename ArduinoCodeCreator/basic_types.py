@@ -109,13 +109,13 @@ class AbstractVariable(AbstractStructureType):
             settable=False,
         )
 
-    def to_pointer(self):
+    def to_pointer(self,type=uint8_t):
         return AbstractVariable(
             name=lambda obscure, indentation: "&{}".format(
                 self.get_name(obscure=obscure)
             ),
             type=self.type,
-        ).cast(uint8_t_pointer)
+        ).cast(type.to_pointer())
 
     def cast(self, datatype):
         return AbstractVariable(
@@ -151,6 +151,7 @@ class AbstractVariable(AbstractStructureType):
     __neg__ = partialmethod(variable_premodifier, operation="-")
     __invert__ = partialmethod(variable_premodifier, operation="~")
 
+    not_ = partialmethod(variable_premodifier, operation="!")
     increment = partialmethod(variable_postmodifier, operation="++")
     or_ = partialmethod(math_operation, operation="||")
     and_ = partialmethod(math_operation, operation="&&")
