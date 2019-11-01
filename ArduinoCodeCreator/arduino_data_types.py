@@ -72,7 +72,7 @@ T = ArduinoDataType("T")
 
 String = ArduinoDataType("String")
 
-def add_types(type, type1):
-    return None
+def add_types(type1, type2):
+    return type1 if type1.byte_size >= type2.byte_size else type2
 
 
