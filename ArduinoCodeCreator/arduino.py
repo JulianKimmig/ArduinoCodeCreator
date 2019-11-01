@@ -60,6 +60,7 @@ class SerialClass(ArduinoClass):
         "write", [Array("buffer", uint8_t), Variable("length", uint16_t)]
     )
     available = Function("available", return_type=int16_t)
+    readString = Function("readString", return_type=String)
 
 
 Serial = SerialClass()

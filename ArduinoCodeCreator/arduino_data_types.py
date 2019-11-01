@@ -70,6 +70,9 @@ int_ = uint16_t
 template_void = ArduinoDataType("template< typename T> void")
 T = ArduinoDataType("T")
 
+String = ArduinoDataType("String")
 
 def add_types(type, type1):
     return None
+
+

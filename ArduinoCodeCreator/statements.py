@@ -20,8 +20,6 @@ class IfStatement(ArduinoStatement):
         return super().__call__(condition, inner_code)
 
 
-if_ = IfStatement()
-
 
 class ElseStatement(ArduinoStatement):
     def __init__(self,):
@@ -32,7 +30,6 @@ class ElseStatement(ArduinoStatement):
         return super().__call__(inner_code)
 
 
-else_ = ElseStatement()
 
 
 class ElseIfStatement(IfStatement):
@@ -40,8 +37,6 @@ class ElseIfStatement(IfStatement):
         super().__init__()
         self.code = self.code.replace("if", "else if")
 
-
-elseif_ = ElseIfStatement()
 
 
 class ForStatement(ArduinoStatement):
@@ -75,7 +70,6 @@ class ForStatement(ArduinoStatement):
         )
 
 
-for_ = ForStatement()
 
 
 class WhileStatement(IfStatement):
@@ -84,9 +78,12 @@ class WhileStatement(IfStatement):
         self.code = self.code.replace("if", "while")
 
 
+
 while_ = WhileStatement()
-
-
+for_ = ForStatement()
+elseif_ = ElseIfStatement()
+else_ = ElseStatement()
+if_ = IfStatement()
 return_ = OneLineStatement("return {};\n", ignore_indentations=True)
 continue_ = OneLineStatement("continue;\n", ignore_indentations=True)
 break_ = OneLineStatement("break;\n", ignore_indentations=True)
