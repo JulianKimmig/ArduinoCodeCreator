@@ -45,6 +45,7 @@ class ArduinoDataType:
         pointer = getattr(sys.modules[self.__module__], self.arduino_code + "_pointer",None)
         if pointer is None:
             pointer = ArduinoDataType(self.arduino_code + "*",python_type=self.python_type)
+            setattr(sys.modules[self.__module__], self.arduino_code + "_pointer",pointer)
         return pointer
 
 
