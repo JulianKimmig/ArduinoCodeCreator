@@ -109,7 +109,7 @@ class AbstractVariable(AbstractStructureType):
             settable=False,
         )
 
-    def to_pointer(self,type=uint8_t):
+    def to_pointer(self, type=uint8_t):
         return AbstractVariable(
             name=lambda obscure, indentation: "&{}".format(
                 self.get_name(obscure=obscure)
@@ -208,14 +208,19 @@ class Definition(AbstractVariable):
 
 
 class Variable(AbstractVariable):
-    def __init__(self, name=None, type=uint8_t, value=None, obscurable=True,constant=False):
+    def __init__(
+        self, name=None, type=uint8_t, value=None, obscurable=True, constant=False
+    ):
         super().__init__(name=name, type=type, obscurable=obscurable)
         self.constant = constant
         self.value = to_abstract_var(value)
 
     def initalize_code(self, obscure, indentation=0):
         code = "{}{}{} {}".format(
-            "\t" * indentation,"const "if self.constant else "", self.type, self.get_name(obscure=obscure)
+            "\t" * indentation,
+            "const " if self.constant else "",
+            self.type,
+            self.get_name(obscure=obscure),
         )
         if self.value is not None:
             code += "={}".format(self.value)
@@ -351,14 +356,16 @@ class Function(AbstractFunction):
             self.add_call(*code)
 
     def add_variable(self, arduino_variable):
-        arg_names =  [arg.name for arg in self.arguments] + [arg.name for arg in self.variables]
+        arg_names = [arg.name for arg in self.arguments] + [
+            arg.name for arg in self.variables
+        ]
         self.variables.append(arduino_variable)
 
-        if(arduino_variable.name in arg_names):
-            i=1
+        if arduino_variable.name in arg_names:
+            i = 1
             newname = f"{arduino_variable.name}_{i}"
-            while(newname in arg_names):
-                i+=1
+            while newname in arg_names:
+                i += 1
                 newname = f"{arduino_variable.name}_{i}"
             arduino_variable.name = newname
 
@@ -474,29 +481,31 @@ class FunctionArray(Array):
             obscurable=False,
         )
 
+
 class FunctionPointer(Function):
     def __init__(
-            self,
-            name=None,
-            return_type=uint8_t,
-            arguments=None,
-            value=None,
-            obscurable=True,
+        self,
+        name=None,
+        return_type=uint8_t,
+        arguments=None,
+        value=None,
+        obscurable=True,
     ):
         super().__init__(
-            name=name, return_type=return_type,arguments=arguments, obscurable=obscurable
+            name=name,
+            return_type=return_type,
+            arguments=arguments,
+            obscurable=obscurable,
         )
-
 
     def initalize_code(self, obscure, indentation=0):
         code = "{}{};{}".format(
             "\t" * indentation,
-            self.as_attribute(
-                obscure=obscure
-            ),
+            self.as_attribute(obscure=obscure),
             "\n" if not obscure else "",
-            )
+        )
         return code
+
 
 class ArduinoStatement:
     def __init__(self, code, ignore_indentations=False):
@@ -521,7 +530,7 @@ class ArduinoStatement:
                 )
                 for arg in args
             ],
-            *["" for i in range(20)]
+            *["" for i in range(20)],
         )
         return code
 

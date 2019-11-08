@@ -42,10 +42,16 @@ class ArduinoDataType:
         return self.arduino_code
 
     def to_pointer(self):
-        pointer = getattr(sys.modules[self.__module__], self.arduino_code + "_pointer",None)
+        pointer = getattr(
+            sys.modules[self.__module__], self.arduino_code + "_pointer", None
+        )
         if pointer is None:
-            pointer = ArduinoDataType(self.arduino_code + "*",python_type=self.python_type)
-            setattr(sys.modules[self.__module__], self.arduino_code + "_pointer",pointer)
+            pointer = ArduinoDataType(
+                self.arduino_code + "*", python_type=self.python_type
+            )
+            setattr(
+                sys.modules[self.__module__], self.arduino_code + "_pointer", pointer
+            )
         return pointer
 
 
@@ -73,7 +79,6 @@ T = ArduinoDataType("T")
 
 String = ArduinoDataType("String")
 
+
 def add_types(type1, type2):
     return type1 if type1.byte_size >= type2.byte_size else type2
-
-

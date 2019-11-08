@@ -14,29 +14,50 @@ class ArduinoBaseClass(ArduinoClass):
     true = Variable("true", obscurable=False)
     false = Variable("false", obscurable=False)
 
-    digitalRead = Function("digitalRead", [(uint8_t,"pin")], uint8_t)
-    digitalWrite = Function("digitalWrite", [(uint8_t,"pin"), (uint8_t,"value")])
-    pinMode = Function("pinMode", [(uint8_t,"pin"), (uint8_t,"mode")])
+    digitalRead = Function("digitalRead", [(uint8_t, "pin")], uint8_t)
+    digitalWrite = Function("digitalWrite", [(uint8_t, "pin"), (uint8_t, "value")])
+    pinMode = Function("pinMode", [(uint8_t, "pin"), (uint8_t, "mode")])
 
-    analogRead = Function("analogRead", [(uint8_t,"pin")], uint16_t)
-    analogWrite = Function("analogWrite", [(uint8_t,"pin"), (uint8_t,"value")])
-    analogReference = Function("analogReference", [(uint8_t,"pin")])
+    analogRead = Function("analogRead", [(uint8_t, "pin")], uint16_t)
+    analogWrite = Function("analogWrite", [(uint8_t, "pin"), (uint8_t, "value")])
+    analogReference = Function("analogReference", [(uint8_t, "pin")])
 
     random = Function("random", arguments=[], return_type=uint16_t)
-    randomSeed = Function(name="randomSeed", arguments=[(uint32_t,"seed")])
+    randomSeed = Function(name="randomSeed", arguments=[(uint32_t, "seed")])
     memcpy = Function(
-        name="memcpy", arguments=[(uint8_t_pointer,"dest"), (uint8_t_pointer,"src"), (uint8_t,"size")]
+        name="memcpy",
+        arguments=[
+            (uint8_t_pointer, "dest"),
+            (uint8_t_pointer, "src"),
+            (uint8_t, "size"),
+        ],
     )
     millis = Function(return_type=uint32_t, name="millis")
-    max = Function(return_type=uint32_t, name="max", arguments=[(uint32_t,"val1"), (uint32_t,"val2")])
-    min = Function(return_type=uint32_t, name="min", arguments=[(uint32_t,"val1"), (uint32_t,"val2")])
-    delay = Function(name="delay", arguments=[(uint32_t,"millis")])
-    delayMicroseconds = Function(name="delayMicroseconds", arguments=[(uint32_t,"micros")])
-    sizeof = Function(name="sizeof", arguments=[(uint32_t,"var")])
+    max = Function(
+        return_type=uint32_t,
+        name="max",
+        arguments=[(uint32_t, "val1"), (uint32_t, "val2")],
+    )
+    min = Function(
+        return_type=uint32_t,
+        name="min",
+        arguments=[(uint32_t, "val1"), (uint32_t, "val2")],
+    )
+    delay = Function(name="delay", arguments=[(uint32_t, "millis")])
+    delayMicroseconds = Function(
+        name="delayMicroseconds", arguments=[(uint32_t, "micros")]
+    )
+    sizeof = Function(name="sizeof", arguments=[(uint32_t, "var")])
     map = Function(
         return_type=uint32_t,
         name="map",
-        arguments=[(uint32_t,"value"), (uint32_t,"fromLow"), (uint32_t,"fromHigh"), (uint32_t,"toLow"), (uint32_t,"toHigh")],
+        arguments=[
+            (uint32_t, "value"),
+            (uint32_t, "fromLow"),
+            (uint32_t, "fromHigh"),
+            (uint32_t, "toLow"),
+            (uint32_t, "toHigh"),
+        ],
     )
 
 
