@@ -1,11 +1,12 @@
+import time
+
 import random
 import re
 import string
-import time
 from functools import partial, partialmethod
 
 from ArduinoCodeCreator import arduino_data_types as dt
-from ArduinoCodeCreator.arduino_data_types import void, uint8_t, uint8_t_pointer
+from ArduinoCodeCreator.arduino_data_types import void, uint8_t
 
 
 def lambda_abstract_var_name(obscure, indentation, abstract_variable):
@@ -693,7 +694,6 @@ class Include(AbstractStructureType):
 
 class ArduinoClass(AbstractStructureType):
     include = None
-
     def __init__(self, *attributes, class_name=None, include=None):
         if class_name is None:
             if hasattr(self, "class_name"):
