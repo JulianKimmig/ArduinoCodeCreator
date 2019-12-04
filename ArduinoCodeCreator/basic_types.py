@@ -694,6 +694,7 @@ class Include(AbstractStructureType):
 
 class ArduinoClass(AbstractStructureType):
     include = None
+
     def __init__(self, *attributes, class_name=None, include=None):
         if class_name is None:
             if hasattr(self, "class_name"):
