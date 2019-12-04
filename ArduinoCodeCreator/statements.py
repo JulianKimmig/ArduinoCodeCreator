@@ -45,7 +45,7 @@ class ForStatement(ArduinoStatement):
     def __call__(self, count_vaiable, continue_condition, raising_value=1, code=None):
         count_vaiable_code = partial(
             lambda_remove_tabs_newline,
-            func=count_vaiable.initalize_code,
+            func=count_vaiable.initialize_code,
             remove_endtabs=False,
         )
         continue_condition = continue_condition.inline

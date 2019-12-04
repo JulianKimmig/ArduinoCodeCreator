@@ -187,7 +187,7 @@ class Definition(AbstractVariable):
         super().__init__(name=name, obscurable=obscurable)
         self.value = value
 
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         return "{}#define {} {}\n".format(
             "\t" * indentation, self.get_name(obscure=obscure), self.value
         )
@@ -216,7 +216,7 @@ class Variable(AbstractVariable):
         self.constant = constant
         self.value = to_abstract_var(value)
 
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         code = "{}{}{} {}".format(
             "\t" * indentation,
             "const " if self.constant else "",
@@ -230,10 +230,10 @@ class Variable(AbstractVariable):
             code += "\n"
         return code
 
-    def initalize(self):
-        return self.initalize_code
+    def initialize(self):
+        return self.initialize_code
 
-    def reinitalize(self):
+    def reinitialize(self):
         return self.set(self.value)
 
     def set(self, value=None):
@@ -370,7 +370,7 @@ class Function(AbstractFunction):
                 newname = f"{arduino_variable.name}_{i}"
             arduino_variable.name = newname
 
-        self.add_call(arduino_variable.initalize())
+        self.add_call(arduino_variable.initialize())
         setattr(self, "var{}".format(len(self.variables)), arduino_variable)
         return arduino_variable
 
@@ -391,7 +391,7 @@ class Function(AbstractFunction):
             [c(obscure=obscure, indentation=indentation) for c in self.inner_calls]
         )
 
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         code = "{} {}({}){{".format(
             self.type,
             self.get_name(obscure=obscure),
@@ -409,7 +409,7 @@ class Function(AbstractFunction):
 
 
 class Redefinition(Function):
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         return self.inner_code(obscure=obscure, indentation=indentation)
 
 
@@ -425,10 +425,10 @@ class Array(Variable):
             .replace(str(self.type), "{}*".format(self.type), 1)
         )
 
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         return (
             super()
-            .initalize_code(obscure=obscure, indentation=indentation)
+            .initialize_code(obscure=obscure, indentation=indentation)
             .replace(
                 self.get_name(obscure=obscure, indentation=indentation),
                 self[self.size].get_name(obscure=obscure, indentation=indentation),
@@ -464,7 +464,7 @@ class FunctionArray(Array):
         )
         self.arguments = arguments
 
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         code = "{}{};{}".format(
             "\t" * indentation,
             self[self.size.get_name(obscure=obscure, indentation=0)].as_attribute(
@@ -499,7 +499,7 @@ class FunctionPointer(Function):
             obscurable=obscurable,
         )
 
-    def initalize_code(self, obscure, indentation=0):
+    def initialize_code(self, obscure, indentation=0):
         code = "{}{};{}".format(
             "\t" * indentation,
             self.as_attribute(obscure=obscure),
@@ -601,7 +601,7 @@ class ArduinoEnum(AbstractStructureType):
                 return data[0]
         return AbstractVariable(None)
 
-    def initalize_code(self, obscure=False, indentation=0):
+    def initialize_code(self, obscure=False, indentation=0):
         newline = "\n" if not obscure else ""
         tabint1, tabint2 = (
             ("", "") if obscure else ("\t" * indentation, "\t" * (indentation + 1))
