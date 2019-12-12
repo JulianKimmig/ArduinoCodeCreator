@@ -64,7 +64,7 @@ int32_t = ArduinoDataType("int32_t")
 uint64_t = ArduinoDataType("uint64_t")
 int64_t = ArduinoDataType("int64_t")
 
-bool_ = ArduinoDataType("bool")
+bool_ = ArduinoDataType("bool", minimum=0, maximum=1, python_type=bool)
 boolean = bool_
 void = ArduinoDataType("void")
 float_ = ArduinoDataType("float", python_type=np.float32)
