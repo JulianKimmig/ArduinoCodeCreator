@@ -33,6 +33,7 @@ class ArduinoBaseClass(ArduinoClass):
         ],
     )
     millis = Function(return_type=uint32_t, name="millis")
+    micros = Function(return_type=uint32_t, name="micros")
     max = Function(
         return_type=uint32_t,
         name="max",

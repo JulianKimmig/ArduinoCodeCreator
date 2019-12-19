@@ -110,7 +110,9 @@ class AbstractVariable(AbstractStructureType):
             settable=False,
         )
 
-    def to_pointer(self, type=uint8_t):
+    def to_pointer(self, type=None):
+        if type is None:
+            type=self.type
         return AbstractVariable(
             name=lambda obscure, indentation: "&{}".format(
                 self.get_name(obscure=obscure)
