@@ -6,7 +6,7 @@ import string
 from functools import partial, partialmethod
 
 from ArduinoCodeCreator import arduino_data_types as dt
-from ArduinoCodeCreator.arduino_data_types import void, uint8_t
+from ArduinoCodeCreator.arduino_data_types import void, uint8_t, uint8_t_pointer
 
 
 def lambda_abstract_var_name(obscure, indentation, abstract_variable):
@@ -111,14 +111,31 @@ class AbstractVariable(AbstractStructureType):
         )
 
     def to_pointer(self, type=None):
-        if type is None:
-            type=self.type
+        pointer_type = self.type.to_pointer()
+
+        # check if is pointer
+        if pointer_type == self.type:
+            if type is None:
+                return self
+            else:
+                return self.cast(type.to_pointer())
+
+
+        target_type = type.to_pointer() if type != None else pointer_type
+
+
         return AbstractVariable(
             name=lambda obscure, indentation: "&{}".format(
                 self.get_name(obscure=obscure)
             ),
             type=self.type,
-        ).cast(type.to_pointer())
+        ).cast(target_type)
+
+
+
+
+
+
 
     def dereference(self):
         return AbstractVariable(

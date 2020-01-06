@@ -42,6 +42,9 @@ class ArduinoDataType:
         return self.arduino_code
 
     def to_pointer(self):
+        if self.arduino_code.endswith("*"):
+            return self
+
         pointer = getattr(
             sys.modules[self.__module__], self.arduino_code + "_pointer", None
         )
@@ -52,6 +55,7 @@ class ArduinoDataType:
             setattr(
                 sys.modules[self.__module__], self.arduino_code + "_pointer", pointer
             )
+
         return pointer
 
 
