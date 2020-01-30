@@ -1,3 +1,6 @@
+import os
+import shutil
+
 import setuptools
 
 with open("requirements.txt") as f:
@@ -22,4 +25,12 @@ setup = dict(
     ],
 )
 if __name__ == "__main__":
+    shutil.rmtree(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist"),
+        ignore_errors=True,
+    )
+    shutil.rmtree(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "build"),
+        ignore_errors=True,
+    )
     setuptools.setup(**setup)
